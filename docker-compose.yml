@@ -13,6 +13,7 @@ services:
     networks:
       - app
     environment:
+      MONGO_INITDB_DATABASE: db
       MONGO_INITDB_ROOT_USERNAME: db
       MONGO_INITDB_ROOT_PASSWORD: password
 

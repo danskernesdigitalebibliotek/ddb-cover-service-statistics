@@ -2,50 +2,55 @@
 
 namespace App\Document;
 
-use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 /**
- * @MongoDB\Document
+ * @ApiResource(
+ *     collectionOperations={"get"},
+ *     itemOperations={"get"},
+ * )
+ * @ODM\Document
  */
 class Entry implements \JsonSerializable
 {
     /**
-     * @MongoDB\Id
+     * @ODM\Id()
      */
     protected $id;
 
     /**
-     * @MongoDB\Field(type="date")
+     * @ODM\Field(type="date")
      */
     protected $date;
 
     /**
-     * @MongoDB\Field(type="string")
+     * @ODM\Field(type="string")
      */
     protected $clientId;
 
     /**
-     * @MongoDB\Field(type="string")
+     * @ODM\Field(type="string")
      */
     protected $agency;
 
     /**
-     * @MongoDB\Field(type="string")
+     * @ODM\Field(type="string")
      */
     protected $event;
 
     /**
-     * @MongoDB\Field(type="string")
+     * @ODM\Field(type="string")
      */
     protected $materialId;
 
     /**
-     * @MongoDB\Field(type="raw")
+     * @ODM\Field(type="raw")
      */
     protected $response;
 
     /**
-     * @MongoDB\Field(type="string")
+     * @ODM\Field(type="string")
      */
     protected $imageId;
 
@@ -177,12 +182,12 @@ class Entry implements \JsonSerializable
         return [
             'id' => $this->getId(),
             'date' => $this->getDate(),
-            'client_id' => $this->getClientId(),
+            'clientId' => $this->getClientId(),
             'agency' => $this->getAgency(),
             'event' => $this->getEvent(),
-            'material_id' => $this->getMaterialId(),
+            'materialId' => $this->getMaterialId(),
             'response' => $this->getResponse(),
-            'image_id' => $this->getImageId(),
+            'imageId' => $this->getImageId(),
         ];
     }
 }
