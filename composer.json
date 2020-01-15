@@ -1,4 +1,6 @@
 {
+    "name": "danskernesdigitalebibliotek/ddb-cover-service-faktor-export",
+    "description": "Data extraction API for Faktor.",
     "type": "project",
     "license": "proprietary",
     "require": {

@@ -1,3 +1,3 @@
 # DDB Cover Service Faktor Export
 
-Data extraction API for FAKTOR.
+Data extraction API for Faktor.
