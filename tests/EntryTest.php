@@ -5,7 +5,7 @@ namespace App\Tests;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 
 /**
- * Class EntryTest
+ * Class EntryTest.
  *
  * Contains test for the Entry document.
  */
