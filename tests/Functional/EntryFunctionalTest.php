@@ -5,11 +5,11 @@ namespace App\Tests;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 
 /**
- * Class EntryTest.
+ * Class EntryFunctionalTest.
  *
- * Contains test for the Entry document.
+ * Contains functional tests for the App\Document\Entry.
  */
-class EntryTest extends ApiTestCase
+class EntryFunctionalTest extends ApiTestCase
 {
     /**
      * Test that the Entry "get" collections endpoint works.
