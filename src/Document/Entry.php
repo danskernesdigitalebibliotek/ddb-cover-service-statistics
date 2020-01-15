@@ -175,7 +175,7 @@ class Entry implements \JsonSerializable
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
