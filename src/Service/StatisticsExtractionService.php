@@ -55,10 +55,10 @@ class StatisticsExtractionService
 
         $jsonQuery = json_encode(
             (object) [
-                "query" => (object) [
-                    "match" => (object) [
-                        "message" => "Cover request/response"
-                    ]
+                'query' => (object) [
+                    'match' => (object) [
+                        'message' => 'Cover request/response',
+                    ],
                 ],
             ]
         );
