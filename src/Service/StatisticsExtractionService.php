@@ -42,7 +42,7 @@ class StatisticsExtractionService
      *
      * @throws \Exception
      */
-    public function getLatestData(\DateTime $date = null)
+    public function getStatistics(\DateTime $date = null)
     {
         if (null === $date) {
             $date = new \DateTime();
@@ -51,9 +51,17 @@ class StatisticsExtractionService
         $dateString = $date->format('d-m-Y');
 
         $indexName = 'stats_'.$dateString;
-        $path = $indexName.'/search/_search';
+        $path = $indexName.'/_search';
 
-        $jsonQuery = json_encode([]);
+        $jsonQuery = json_encode(
+            (object) [
+                "query" => (object) [
+                    "match" => (object) [
+                        "message" => "Cover request/response"
+                    ]
+                ],
+            ]
+        );
 
         $ch = curl_init($this->elasticsearchURL.$path);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -73,6 +81,6 @@ class StatisticsExtractionService
         }
         curl_close($ch);
 
-        return $results;
+        return $results->hits->hits;
     }
 }

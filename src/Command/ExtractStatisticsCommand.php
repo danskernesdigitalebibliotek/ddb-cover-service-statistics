@@ -37,12 +37,15 @@ class ExtractStatisticsCommand extends Command
 
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $this->extractionService->getLatestData();
+        $result = $this->extractionService->getStatistics();
+
+        $io->write(json_encode($result));
 
         $io->success('Data extracted successfully.');
 
