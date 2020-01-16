@@ -8,7 +8,7 @@
 namespace App\Service;
 
 /**
- * Class ElasticsearchFaker
+ * Class ElasticsearchFaker.
  */
 class ElasticsearchFaker
 {
@@ -18,7 +18,7 @@ class ElasticsearchFaker
      * ElasticsearchFaker constructor.
      *
      * @param $boundElasticsearchURL
-     *   Url of Elasticsearch instance.
+     *   Url of Elasticsearch instance
      */
     public function __construct($boundElasticsearchURL)
     {
@@ -28,11 +28,20 @@ class ElasticsearchFaker
     /**
      * Create test data for current date.
      *
+     * @param \DateTime|null $date
+     *   Date to create index of fake data for. Defaults to today.
+     *
      * @throws \Exception
      */
-    public function createTestData() {
-        $today = (new \DateTime())->format('d-m-Y');
-        $indexName = 'stats_'.$today;
+    public function createTestData(\DateTime $date = null)
+    {
+        if (null === $date) {
+            $date = new \DateTime();
+        }
+
+        $dateString = ($date)->format('d-m-Y');
+
+        $indexName = 'stats_'.$dateString;
         $path = $indexName;
 
         $ch = curl_init($this->elasticsearchURL.$path);
@@ -44,8 +53,7 @@ class ElasticsearchFaker
             $error = curl_error($ch);
             curl_close($ch);
             throw new \Exception('Curl ES query error: '.$error);
-        }
-        else {
+        } else {
             curl_close($ch);
         }
 
@@ -59,13 +67,13 @@ class ElasticsearchFaker
 
         foreach ($queries as $query) {
             $context = json_decode($query);
-            $document = (object)[];
+            $document = (object) [];
             $document->message = 'Cover request/response';
             $document->context = $context;
             $document->level = 200;
             $document->level_name = 'INFO';
             $document->channel = 'statistics';
-            $document->datetime = (new \DateTime())->format(DATE_ISO8601);
+            $document->datetime = $date->format(DATE_ISO8601);
             $jsonQuery = json_encode($document);
 
             $ch = curl_init($this->elasticsearchURL.$path.'/logs/');
@@ -84,8 +92,7 @@ class ElasticsearchFaker
                 $error = curl_error($ch);
                 curl_close($ch);
                 throw new \Exception('Curl ES query error: '.$error);
-            }
-            else {
+            } else {
                 curl_close($ch);
             }
         }

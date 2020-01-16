@@ -7,11 +7,10 @@
 
 namespace App\Service;
 
-use PHPUnit\Runner\Exception;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class StatisticsExtractorService
+ * Class StatisticsExtractorService.
  */
 class StatisticsExtractionService
 {
@@ -20,6 +19,11 @@ class StatisticsExtractionService
 
     /**
      * StatisticsExtractionService constructor.
+     *
+     * @param \Psr\Log\LoggerInterface $logger
+     *   The logger
+     * @param $boundElasticsearchURL
+     *   Url of elasticsearch instance
      */
     public function __construct(LoggerInterface $logger, $boundElasticsearchURL)
     {
@@ -27,8 +31,26 @@ class StatisticsExtractionService
         $this->elasticsearchURL = $boundElasticsearchURL;
     }
 
-    public function getLatestData() {
-        $indexName = 'stats_16-01-2020';
+    /**
+     * Get the records from the given date.
+     *
+     * @param \DateTime|null $date
+     *   Requested date. Defaults to today.
+     *
+     * @return array
+     *   Array of logs for the given date
+     *
+     * @throws \Exception
+     */
+    public function getLatestData(\DateTime $date = null)
+    {
+        if (null === $date) {
+            $date = new \DateTime();
+        }
+
+        $dateString = $date->format('d-m-Y');
+
+        $indexName = 'stats_'.$dateString;
         $path = $indexName.'/search/_search';
 
         $jsonQuery = json_encode([]);

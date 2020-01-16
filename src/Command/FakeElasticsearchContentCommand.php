@@ -3,11 +3,8 @@
 namespace App\Command;
 
 use App\Service\ElasticsearchFaker;
-use App\Service\StatisticsExtractionService;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -21,7 +18,7 @@ class FakeElasticsearchContentCommand extends Command
      * ExtractStatisticsCommand constructor.
      *
      * @param \App\Service\ElasticsearchFaker $elasticsearchFaker
-     *   The faker service.
+     *   The faker service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()
      */
@@ -33,7 +30,7 @@ class FakeElasticsearchContentCommand extends Command
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -41,7 +38,7 @@ class FakeElasticsearchContentCommand extends Command
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
