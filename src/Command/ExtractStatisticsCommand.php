@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains a command to extract statistics from Elasticsearch.
+ */
+
 namespace App\Command;
 
 use App\Service\StatisticsExtractionService;
@@ -8,6 +13,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Class ExtractStatisticsCommand.
+ */
 class ExtractStatisticsCommand extends Command
 {
     private $extractionService;

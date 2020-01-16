@@ -73,13 +73,18 @@ class StatisticsExtractionService
         ]);
         $response = curl_exec($ch);
 
+        $error = null;
         if (false === $response) {
             $error = curl_error($ch);
-            throw new \Exception($error);
-        } else {
-            $results = json_decode($response);
         }
+
         curl_close($ch);
+
+        if (null !== $error) {
+            throw new \Exception($error);
+        }
+
+        $results = json_decode($response);
 
         return $results->hits->hits;
     }

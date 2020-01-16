@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains a command to create fake content in Elasticsearch.
+ */
+
 namespace App\Command;
 
 use App\Service\ElasticsearchFaker;
@@ -8,6 +13,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Class FakeElasticsearchContentCommand.
+ */
 class FakeElasticsearchContentCommand extends Command
 {
     private $extractionService;
