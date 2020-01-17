@@ -50,7 +50,7 @@ class StatisticsExtractionService
     {
         // Get latest extraction entry. Default to first day of production.
         /* @var ExtractionResult $lastExtraction */
-        $lastExtraction = $this->extractionResultRepository->getLastEntry();
+        $lastExtraction = $this->extractionResultRepository->getNewestEntry();
 
         // @TODO: Set correct date of first stats entry
         /* @var \DateTime $latestExtractionDate */

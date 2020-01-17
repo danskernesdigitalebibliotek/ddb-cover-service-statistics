@@ -6,19 +6,34 @@ use App\Document\ExtractionResult;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 
+/**
+ * Class ExtractionResultRepository
+ */
 class ExtractionResultRepository extends DocumentRepository
 {
-    public function __construct(DocumentManager $documentManagerm)
+    /**
+     * ExtractionResultRepository constructor.
+     *
+     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     *   The doctrine document manager
+     */
+    public function __construct(DocumentManager $documentManager)
     {
-        $uow = $documentManagerm->getUnitOfWork();
-        $classMetaData = $documentManagerm->getClassMetadata(ExtractionResult::class);
-        parent::__construct($documentManagerm, $uow, $classMetaData);
+        $uow = $documentManager->getUnitOfWork();
+        $classMetaData = $documentManager->getClassMetadata(ExtractionResult::class);
+        parent::__construct($documentManager, $uow, $classMetaData);
     }
 
-    public function getLastEntry()
+    /**
+     * Get the newest entry.
+     *
+     * @return array|object|null
+     *   The result
+     */
+    public function getNewestEntry()
     {
         return $this->createQueryBuilder()
-            ->sort('e.date', 'DESC')
+            ->sort('date', 'DESC')
             ->limit(1)
             ->getQuery()
             ->getSingleResult();
