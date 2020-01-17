@@ -42,7 +42,7 @@ class FakeElasticsearchContentCommand extends Command
      */
     protected function configure()
     {
-        $this->setDescription('Extracts statistics');
+        $this->setDescription('Add fake data to elasticsearch');
     }
 
     /**

@@ -52,9 +52,7 @@ class ExtractStatisticsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $result = $this->extractionService->getStatistics();
-
-        $io->write(json_encode($result));
+        $this->extractionService->extractStatistics();
 
         $io->success('Data extracted successfully.');
 
