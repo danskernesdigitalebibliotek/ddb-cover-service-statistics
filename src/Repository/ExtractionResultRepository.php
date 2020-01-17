@@ -7,7 +7,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 
 /**
- * Class ExtractionResultRepository
+ * Class ExtractionResultRepository.
  */
 class ExtractionResultRepository extends DocumentRepository
 {
