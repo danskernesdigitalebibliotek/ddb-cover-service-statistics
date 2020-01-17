@@ -59,7 +59,7 @@ class StatisticsExtractionService
         // Extract logs for all dates from latest extraction date to yesterday.
         $yesterday = new \DateTime('-1 day');
 
-        $numberOfDaysToSearch = $yesterday->diff($latestExtractionDate)->format("%a");
+        $numberOfDaysToSearch = $yesterday->diff($latestExtractionDate)->format('%a');
 
         // @TODO: Get all stats indexes that have not been searched through.
         $statistics = $this->getLogsFromElasticsearch(new \DateTime());
