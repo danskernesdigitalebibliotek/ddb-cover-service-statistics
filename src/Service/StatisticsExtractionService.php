@@ -20,8 +20,8 @@ class StatisticsExtractionService
 {
     private $documentManager;
     private $logger;
-    private $elasticsearchURL;
     private $extractionResultRepository;
+    private $elasticsearchService;
 
     /**
      * StatisticsExtractionService constructor.
@@ -32,14 +32,14 @@ class StatisticsExtractionService
      *   Repository for ExtractResult documents
      * @param \Psr\Log\LoggerInterface $logger
      *   The logger
-     * @param $boundElasticsearchURL
-     *   Url of elasticsearch instance
+     * @param \App\Service\ElasticsearchService $elasticsearchService
+     *   Service to integrate with elasticsearch
      */
-    public function __construct(DocumentManager $documentManager, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, $boundElasticsearchURL)
+    public function __construct(DocumentManager $documentManager, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, ElasticsearchService $elasticsearchService)
     {
         $this->documentManager = $documentManager;
         $this->logger = $logger;
-        $this->elasticsearchURL = $boundElasticsearchURL;
+        $this->elasticsearchService = $elasticsearchService;
         $this->extractionResultRepository = $extractionResultRepository;
     }
 
@@ -65,7 +65,7 @@ class StatisticsExtractionService
         while ($numberOfDaysToSearch > 0) {
             $dayToSearch = new \DateTime('-'.($numberOfDaysToSearch - 1).' days');
 
-            $statistics = $this->getLogsFromElasticsearch($dayToSearch);
+            $statistics = $this->elasticsearchService->getLogsFromElasticsearch($dayToSearch, 'Cover request/response');
 
             // Add all to mongodb.
             foreach ($statistics as $statisticsEntry) {
@@ -170,59 +170,5 @@ class StatisticsExtractionService
 
         // Flush to database.
         $this->documentManager->flush();
-    }
-
-    /**
-     * Get the records from the given date from Elasticsearch.
-     *
-     * @param \DateTime $date
-     *   Requested date
-     *
-     * @return array
-     *   Array of logs for the given date
-     *
-     * @throws \Exception
-     */
-    private function getLogsFromElasticsearch(\DateTime $date)
-    {
-        $dateString = $date->format('d-m-Y');
-
-        $indexName = 'stats_'.$dateString;
-        $path = $indexName.'/_search';
-
-        $jsonQuery = json_encode(
-            (object) [
-                'query' => (object) [
-                    'match' => (object) [
-                        'message' => 'Cover request/response',
-                    ],
-                ],
-            ]
-        );
-
-        $curlHandle = curl_init($this->elasticsearchURL.$path);
-        curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $jsonQuery);
-        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: '.strlen($jsonQuery),
-        ]);
-        $response = curl_exec($curlHandle);
-
-        $error = null;
-        if (false === $response) {
-            $error = curl_error($curlHandle);
-        }
-
-        curl_close($curlHandle);
-
-        if (null !== $error) {
-            throw new \Exception($error);
-        }
-
-        $results = json_decode($response);
-
-        return $results->hits->hits ?? [];
     }
 }
