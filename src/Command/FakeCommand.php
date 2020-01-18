@@ -7,7 +7,7 @@
 
 namespace App\Command;
 
-use App\Service\ElasticsearchFaker;
+use App\Service\DataFakerService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,23 +16,23 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Class FakeElasticsearchContentCommand.
  */
-class FakeElasticsearchContentCommand extends Command
+class FakeCommand extends Command
 {
-    private $extractionService;
+    private $fakerService;
 
-    protected static $defaultName = 'app:fake-elaticsearch-content';
+    protected static $defaultName = 'app:fake-content';
 
     /**
      * ExtractStatisticsCommand constructor.
      *
-     * @param \App\Service\ElasticsearchFaker $elasticsearchFaker
+     * @param \App\Service\DataFakerService $elasticsearchFaker
      *   The faker service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()
      */
-    public function __construct(ElasticsearchFaker $elasticsearchFaker, string $name = null)
+    public function __construct(DataFakerService $elasticsearchFaker, string $name = null)
     {
-        $this->extractionService = $elasticsearchFaker;
+        $this->fakerService = $elasticsearchFaker;
 
         parent::__construct($name);
     }
@@ -52,7 +52,7 @@ class FakeElasticsearchContentCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $this->extractionService->createTestData();
+        $this->fakerService->createElasticsearchTestData();
 
         $io->success('Adding fake data to elasticsearch successfully.');
 

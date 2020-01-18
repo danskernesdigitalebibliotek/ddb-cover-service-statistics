@@ -7,22 +7,60 @@
 
 namespace App\Service;
 
+use App\Document\Entry;
+use App\Repository\ExtractionResultRepository;
+use Doctrine\ODM\MongoDB\DocumentManager;
+
 /**
  * Class ElasticsearchFaker.
  */
-class ElasticsearchFaker
+class DataFakerService
 {
     private $elasticsearchURL;
+    private $extractionResultRepository;
+    private $documentManager;
 
     /**
      * ElasticsearchFaker constructor.
      *
+     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     *   The mongodb document manager
+     * @param \App\Repository\ExtractionResultRepository $extractionResultRepository
+     *   Repository for ExtractionResult documents
      * @param $boundElasticsearchURL
      *   Url of Elasticsearch instance
      */
-    public function __construct($boundElasticsearchURL)
+    public function __construct(DocumentManager $documentManager, ExtractionResultRepository $extractionResultRepository, $boundElasticsearchURL)
     {
+        $this->documentManager = $documentManager;
         $this->elasticsearchURL = $boundElasticsearchURL;
+        $this->extractionResultRepository = $extractionResultRepository;
+    }
+
+    /**
+     * Replaces elaticsearch calls with expected results for functional tests.
+     */
+    public function mockElasticsearch()
+    {
+        // @TODO
+    }
+
+    /**
+     * Remove all content from mongo database.
+     *
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     */
+    public function cleanMongoDatabase()
+    {
+        $results = $this->extractionResultRepository->findAll();
+        foreach ($results as $result) {
+            $this->documentManager->remove($result);
+        }
+        $results = $this->documentManager->getRepository(Entry::class)->findAll();
+        foreach ($results as $result) {
+            $this->documentManager->remove($result);
+        }
+        $this->documentManager->flush();
     }
 
     /**
@@ -33,7 +71,7 @@ class ElasticsearchFaker
      *
      * @throws \Exception
      */
-    public function createTestData(\DateTime $date = null)
+    public function createElasticsearchTestData(\DateTime $date = null)
     {
         if (null === $date) {
             $date = new \DateTime();
@@ -61,6 +99,13 @@ class ElasticsearchFaker
         }
 
         $queries = [
+            // Version 1 of stats logging:
+            '{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087","870970-basis:53969127","870970-basis:00000001"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788702246841.jpg"]}',
+            '{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg"]}',
+            '{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"pid":["870970-basis:29506914","870970-basis:29506906","882330-basis:17154889"],"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396728.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396650.jpg"],"elasticQueryTime":0.038236141204833984}',
+            '{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg"],"elasticQueryTime":0.033380985260009766}',
+            '{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"isbn":["900000000000000"]},"fileNames":null,"elasticQueryTime":0.025002002716064453}',
+            // Version 2 of stats logging:
             '{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087","870970-basis:53969127","870970-basis:00000001"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788702246841.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","identifier":"870970-basis:26957087","type":"pid"},{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788702246841.jpg","identifier":"870970-basis:53969127","type":"pid"},{"match":null,"identifier":"870970-basis:00000001","type":"pid"}]}',
             '{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","identifier":"870970-basis:26957087","type":"pid"}]}',
             '{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"pid":["870970-basis:29506914","870970-basis:29506906","882330-basis:17154889"],"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396728.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396650.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396728.jpg","identifier":"870970-basis:29506914","type":"pid"},{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396650.jpg","identifier":"870970-basis:29506906","type":"pid"},{"match":null,"identifier":"882330-basis:17154889","type":"pid"},{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","identifier":"9788740602456","type":"isbn"}],"elasticQueryTime":0.038236141204833984}',
