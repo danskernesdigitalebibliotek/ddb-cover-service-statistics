@@ -19,27 +19,6 @@ use Psr\Log\LoggerInterface;
 class FunctionalTest extends ApiTestCase
 {
     /**
-     * Remove all content from mongo database.
-     *
-     * @throws \Doctrine\ODM\MongoDB\MongoDBException
-     */
-    private function cleanMongoDatabase()
-    {
-        $container = self::$container;
-        $documentManager = $container->get(DocumentManager::class);
-
-        $results = $documentManager->getRepository(ExtractionResult::class)->findAll();
-        foreach ($results as $result) {
-            $documentManager->remove($result);
-        }
-        $results = $documentManager->getRepository(Entry::class)->findAll();
-        foreach ($results as $result) {
-            $documentManager->remove($result);
-        }
-        $documentManager->flush();
-    }
-
-    /**
      * Test that the Entry "get" collections endpoint works.
      *
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
@@ -105,5 +84,26 @@ class FunctionalTest extends ApiTestCase
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
         $content = $response->toArray();
         $this->assertEquals(20, count($content['hydra:member']), 'Number of entries in response should be 20');
+    }
+
+    /**
+     * Remove all content from mongo database.
+     *
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     */
+    private function cleanMongoDatabase()
+    {
+        $container = self::$container;
+        $documentManager = $container->get(DocumentManager::class);
+
+        $results = $documentManager->getRepository(ExtractionResult::class)->findAll();
+        foreach ($results as $result) {
+            $documentManager->remove($result);
+        }
+        $results = $documentManager->getRepository(Entry::class)->findAll();
+        foreach ($results as $result) {
+            $documentManager->remove($result);
+        }
+        $documentManager->flush();
     }
 }

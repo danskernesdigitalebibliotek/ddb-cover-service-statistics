@@ -7,8 +7,6 @@
 
 namespace App\Service;
 
-use App\Document\Entry;
-use App\Document\ExtractionResult;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**

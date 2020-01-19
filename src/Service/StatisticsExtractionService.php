@@ -107,9 +107,8 @@ class StatisticsExtractionService
                         foreach ($statisticsEntry->_source->context->searchParameters as $identifiers) {
                             $searchIdentifiers = array_merge($searchIdentifiers, $identifiers);
                         }
-                    }
-                    // Extract identifiers from isIdentifiers for REST_API requests
-                    elseif (isset($statisticsEntry->_source->context->isIdentifiers)) {
+                    } elseif (isset($statisticsEntry->_source->context->isIdentifiers)) {
+                        // Extract identifiers from isIdentifiers for REST_API requests
                         $searchIdentifiers = $statisticsEntry->_source->context->isIdentifiers;
                     }
 
