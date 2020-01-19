@@ -3,14 +3,15 @@
 namespace App\Tests;
 
 use App\Document\Entry;
+use App\Document\ExtractionResult;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class EntryUnitTest.
+ * Class UnitTest.
  *
  * Contains unit tests for the App\Document\Entry.
  */
-class EntryUnitTest extends TestCase
+class UnitTest extends TestCase
 {
     /**
      * Test that Entry document serialization works.
@@ -41,5 +42,26 @@ class EntryUnitTest extends TestCase
         $this->assertEquals(json_decode(json_encode($date)), $decoded->date);
         $this->assertEquals('6', $decoded->clientId);
         $this->assertEquals('7', $decoded->agency);
+    }
+
+    /**
+     * Test that ExtractionResult document serialization works.
+     *
+     * @throws \Exception
+     */
+    public function testExtractionResultDocumentSerialization(): void
+    {
+        $date = new \DateTime();
+
+        $extractionResult = new ExtractionResult();
+        $extractionResult->setDate($date);
+        $extractionResult->setNumberOfEntriesAdded(5);
+
+        $encoded = json_encode($extractionResult);
+
+        $decoded = json_decode($encoded);
+
+        $this->assertEquals(json_decode(json_encode($date)), $decoded->date);
+        $this->assertEquals(5, $decoded->numberOfEntriesAdded);
     }
 }

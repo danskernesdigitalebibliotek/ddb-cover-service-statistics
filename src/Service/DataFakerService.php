@@ -8,7 +8,7 @@
 namespace App\Service;
 
 use App\Document\Entry;
-use App\Repository\ExtractionResultRepository;
+use App\Document\ExtractionResult;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
@@ -17,7 +17,6 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 class DataFakerService
 {
     private $elasticsearchURL;
-    private $extractionResultRepository;
     private $documentManager;
 
     /**
@@ -25,42 +24,13 @@ class DataFakerService
      *
      * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
      *   The mongodb document manager
-     * @param \App\Repository\ExtractionResultRepository $extractionResultRepository
-     *   Repository for ExtractionResult documents
      * @param $boundElasticsearchURL
      *   Url of Elasticsearch instance
      */
-    public function __construct(DocumentManager $documentManager, ExtractionResultRepository $extractionResultRepository, $boundElasticsearchURL)
+    public function __construct(DocumentManager $documentManager, $boundElasticsearchURL)
     {
         $this->documentManager = $documentManager;
         $this->elasticsearchURL = $boundElasticsearchURL;
-        $this->extractionResultRepository = $extractionResultRepository;
-    }
-
-    /**
-     * Replaces elaticsearch calls with expected results for functional tests.
-     */
-    public function mockElasticsearch()
-    {
-        // @TODO
-    }
-
-    /**
-     * Remove all content from mongo database.
-     *
-     * @throws \Doctrine\ODM\MongoDB\MongoDBException
-     */
-    public function cleanMongoDatabase()
-    {
-        $results = $this->extractionResultRepository->findAll();
-        foreach ($results as $result) {
-            $this->documentManager->remove($result);
-        }
-        $results = $this->documentManager->getRepository(Entry::class)->findAll();
-        foreach ($results as $result) {
-            $this->documentManager->remove($result);
-        }
-        $this->documentManager->flush();
     }
 
     /**
@@ -82,17 +52,17 @@ class DataFakerService
         $indexName = 'stats_'.$dateString;
         $path = $indexName;
 
-        $ch = curl_init($this->elasticsearchURL.$path);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
+        $curlHandle = curl_init($this->elasticsearchURL.$path);
+        curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT');
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($curlHandle);
 
         $error = null;
         if (false === $response) {
-            $error = curl_error($ch);
+            $error = curl_error($curlHandle);
         }
 
-        curl_close($ch);
+        curl_close($curlHandle);
 
         if (null !== $error) {
             throw new \Exception($error);
@@ -124,24 +94,24 @@ class DataFakerService
             $document->datetime = $date->format(DATE_ISO8601);
             $jsonQuery = json_encode($document);
 
-            $ch = curl_init($this->elasticsearchURL.$path.'/logs/');
+            $curlHandle = curl_init($this->elasticsearchURL.$path.'/logs/');
 
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonQuery);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $jsonQuery);
+            curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curlHandle, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 'Content-Length: '.strlen($jsonQuery),
             ]);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $response = curl_exec($ch);
+            curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+            $response = curl_exec($curlHandle);
 
             $error = null;
             if (false === $response) {
-                $error = curl_error($ch);
+                $error = curl_error($curlHandle);
             }
 
-            curl_close($ch);
+            curl_close($curlHandle);
 
             if (null !== $error) {
                 throw new \Exception($error);

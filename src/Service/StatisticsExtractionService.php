@@ -56,12 +56,15 @@ class StatisticsExtractionService
 
         // @TODO: Set correct date of first stats entry
         /* @var \DateTime $latestExtractionDate */
-        $latestExtractionDate = $lastExtraction ? $lastExtraction->getDate() : new \Datetime('17 january 2020');
+        $latestExtractionDate = $lastExtraction ? $lastExtraction->getDate() : new \Datetime('1 december 2019');
 
         $today = new \DateTime();
         $numberOfDaysToSearch = (int) $today->diff($latestExtractionDate)->format('%a');
 
+        $numberOfEntriesAdded = 0;
+
         // Extract logs for all dates from latest extraction date to yesterday.
+        // Craete all as Entries in the database.
         while ($numberOfDaysToSearch > 0) {
             $dayToSearch = new \DateTime('-'.($numberOfDaysToSearch - 1).' days');
 
@@ -91,6 +94,7 @@ class StatisticsExtractionService
                         $entry->setResponse(json_encode($response));
 
                         $this->documentManager->persist($entry);
+                        ++$numberOfEntriesAdded;
                     }
                 } else {
                     // Version 1 of statistics logging, where matches is not set.
@@ -122,6 +126,7 @@ class StatisticsExtractionService
                         $entry->setResponse(json_encode(['message' => 'ok']));
 
                         $this->documentManager->persist($entry);
+                        ++$numberOfEntriesAdded;
 
                         continue;
                     }
@@ -139,6 +144,7 @@ class StatisticsExtractionService
                             $entry->setResponse(json_encode(['image not found']));
 
                             $this->documentManager->persist($entry);
+                            ++$numberOfEntriesAdded;
                         }
 
                         continue;
@@ -156,6 +162,7 @@ class StatisticsExtractionService
                         $entry->setResponse(json_encode(['image maybe found']));
 
                         $this->documentManager->persist($entry);
+                        ++$numberOfEntriesAdded;
                     }
                 }
             }
@@ -166,6 +173,7 @@ class StatisticsExtractionService
         // Save new extraction result.
         $extractionResult = new ExtractionResult();
         $extractionResult->setDate(new \DateTime());
+        $extractionResult->setNumberOfEntriesAdded($numberOfEntriesAdded);
         $this->documentManager->persist($extractionResult);
 
         // Flush to database.

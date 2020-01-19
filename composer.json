@@ -101,6 +101,9 @@
         "phpunit": [
             "./bin/phpunit"
         ],
+        "phpunit-coverage": [
+            "./bin/phpunit --coverage-text=coverage/report.txt"
+        ],
         "actions/phpcs": [
             "phpcs --standard=phpcs.xml.dist --report=checkstyle"
         ],
@@ -112,6 +115,9 @@
         ],
         "actions/unittests": [
             "./bin/phpunit tests/Unit"
+        ],
+        "actions/functionaltests": [
+            "./bin/phpunit tests/Functional"
         ]
     },
     "conflict": {
