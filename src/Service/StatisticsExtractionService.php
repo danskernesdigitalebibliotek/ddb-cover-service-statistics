@@ -119,8 +119,8 @@ class StatisticsExtractionService
                         $entry->setDate(new \DateTime($statisticsEntry->_source->datetime));
                         $entry->setAgency($statisticsEntry->_source->context->clientID);
                         $entry->setClientId('CoverService');
-                        $entry->setImageId($fileNames[0]);
-                        $entry->setMaterialId($searchIdentifiers[0]);
+                        $entry->setImageId(array_pop($fileNames));
+                        $entry->setMaterialId(array_pop($searchIdentifiers));
                         $entry->setEvent('request_image');
                         $entry->setResponse(json_encode(['message' => 'ok']));
 
