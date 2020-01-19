@@ -52,7 +52,11 @@ class FakeCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $this->fakerService->createElasticsearchTestData();
+        $date = $io->ask('Select a date (for example "7 december 2019" or "-2 days")?', 'today');
+
+        $date = new \DateTime($date);
+
+        $this->fakerService->createElasticsearchTestData($date);
 
         $io->success('Adding fake data to elasticsearch successfully.');
 

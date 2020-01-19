@@ -92,6 +92,7 @@ class StatisticsExtractionService
                         $entry->setMaterialId($matchEntry->identifier);
                         $entry->setEvent('request_image');
                         $entry->setResponse(json_encode($response));
+                        $entry->setExtracted(false);
 
                         $this->documentManager->persist($entry);
                         ++$numberOfEntriesAdded;
@@ -123,6 +124,7 @@ class StatisticsExtractionService
                         $entry->setMaterialId(array_pop($searchIdentifiers));
                         $entry->setEvent('request_image');
                         $entry->setResponse(json_encode(['message' => 'ok']));
+                        $entry->setExtracted(false);
 
                         $this->documentManager->persist($entry);
                         ++$numberOfEntriesAdded;
@@ -141,6 +143,7 @@ class StatisticsExtractionService
                             $entry->setMaterialId($identifier);
                             $entry->setEvent('request_image');
                             $entry->setResponse(json_encode(['image not found']));
+                            $entry->setExtracted(false);
 
                             $this->documentManager->persist($entry);
                             ++$numberOfEntriesAdded;
@@ -159,6 +162,7 @@ class StatisticsExtractionService
                         $entry->setMaterialId($identifier);
                         $entry->setEvent('request_image');
                         $entry->setResponse(json_encode(['image maybe found']));
+                        $entry->setExtracted(false);
 
                         $this->documentManager->persist($entry);
                         ++$numberOfEntriesAdded;
@@ -176,6 +180,20 @@ class StatisticsExtractionService
         $this->documentManager->persist($extractionResult);
 
         // Flush to database.
+        $this->documentManager->flush();
+    }
+
+    /**
+     * Remove already extracted entries.
+     */
+    public function removeExtractedEntries()
+    {
+        $entries = $this->documentManager->getRepository(Entry::class)->findBy(['extracted' => true]);
+
+        foreach ($entries as $entry) {
+            $this->documentManager->remove($entry);
+        }
+
         $this->documentManager->flush();
     }
 }

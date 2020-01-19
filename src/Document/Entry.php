@@ -2,7 +2,10 @@
 
 namespace App\Document;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\MongoDbOdm\Filter\BooleanFilter;
+use ApiPlatform\Core\Bridge\Doctrine\MongoDbOdm\Filter\DateFilter;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 /**
@@ -10,6 +13,9 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  *     collectionOperations={"get"},
  *     itemOperations={"get"},
  * )
+ * @ApiFilter(DateFilter::class, properties={"date"})
+ * @ApiFilter(BooleanFilter::class, properties={"extracted"})
+ *
  * @ODM\Document
  */
 class Entry implements \JsonSerializable
@@ -53,6 +59,16 @@ class Entry implements \JsonSerializable
      * @ODM\Field(type="string")
      */
     protected $imageId;
+
+    /**
+     * @ODM\Field(type="date")
+     */
+    protected $extractionDate;
+
+    /**
+     * @ODM\Field(type="boolean")
+     */
+    protected $extracted;
 
     /**
      * @return mixed
@@ -175,6 +191,38 @@ class Entry implements \JsonSerializable
     }
 
     /**
+     * @return mixed
+     */
+    public function getExtracted()
+    {
+        return $this->extracted;
+    }
+
+    /**
+     * @param mixed $extracted
+     */
+    public function setExtracted($extracted): void
+    {
+        $this->extracted = $extracted;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getExtractionDate()
+    {
+        return $this->extractionDate;
+    }
+
+    /**
+     * @param mixed $extractionDate
+     */
+    public function setExtractionDate($extractionDate): void
+    {
+        $this->extractionDate = $extractionDate;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function jsonSerialize()
@@ -188,6 +236,8 @@ class Entry implements \JsonSerializable
             'materialId' => $this->getMaterialId(),
             'response' => $this->getResponse(),
             'imageId' => $this->getImageId(),
+            'extracted' => $this->getExtracted(),
+            'extractionDate' => $this->getExtractionDate(),
         ];
     }
 }

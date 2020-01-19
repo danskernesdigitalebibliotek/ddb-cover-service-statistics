@@ -20,7 +20,10 @@ api_platform:
     formats:
         json:
             mime_types: ['application/json']
-        html:
-            mime_types: ['text/html']
         jsonld:
             mime_types: ['application/ld+json']
+        html:
+            mime_types: ['text/html']
+    collection:
+        pagination:
+            items_per_page: 100

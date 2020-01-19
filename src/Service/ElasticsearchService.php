@@ -7,22 +7,28 @@
 
 namespace App\Service;
 
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
 /**
  * Class ElasticsearchService.
  */
 class ElasticsearchService
 {
     private $elasticsearchURL;
+    private $httpClient;
 
     /**
      * StatisticsExtractionService constructor.
      *
+     * @param \Symfony\Contracts\HttpClient\HttpClientInterface $httpClient
+     *   The http client
      * @param $boundElasticsearchURL
      *   Url of elasticsearch instance
      */
-    public function __construct($boundElasticsearchURL)
+    public function __construct(HttpClientInterface $httpClient, $boundElasticsearchURL)
     {
         $this->elasticsearchURL = $boundElasticsearchURL;
+        $this->httpClient = $httpClient;
     }
 
     /**
@@ -36,7 +42,11 @@ class ElasticsearchService
      * @return array
      *   Array of logs for the given date
      *
-     * @throws \Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     public function getLogsFromElasticsearch(\DateTime $date, string $message)
     {
@@ -55,29 +65,22 @@ class ElasticsearchService
             ]
         );
 
-        $curlHandle = curl_init($this->elasticsearchURL.$path);
-        curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $jsonQuery);
-        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: '.strlen($jsonQuery),
+        $indexExists = $this->httpClient->request('HEAD', $this->elasticsearchURL.$indexName)->getStatusCode();
+
+        if (200 !== $indexExists) {
+            return [];
+        }
+
+        $response = $this->httpClient->request('POST', $this->elasticsearchURL.$path, [
+            'body' => $jsonQuery,
+            'headers' => [
+                'Content-Type: application/json',
+                'Content-Length: '.strlen($jsonQuery),
+            ],
         ]);
-        $response = curl_exec($curlHandle);
 
-        $error = null;
-        if (false === $response) {
-            $error = curl_error($curlHandle);
-        }
+        $result = json_decode($response->getContent());
 
-        curl_close($curlHandle);
-
-        if (null !== $error) {
-            throw new \Exception($error);
-        }
-
-        $results = json_decode($response);
-
-        return $results->hits->hits ?? [];
+        return $result->hits->hits ?? [];
     }
 }

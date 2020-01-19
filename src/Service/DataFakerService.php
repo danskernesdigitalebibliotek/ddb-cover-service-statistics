@@ -8,6 +8,7 @@
 namespace App\Service;
 
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Class ElasticsearchFaker.
@@ -16,19 +17,23 @@ class DataFakerService
 {
     private $elasticsearchURL;
     private $documentManager;
+    private $httpClient;
 
     /**
      * ElasticsearchFaker constructor.
      *
+     * @param \Symfony\Contracts\HttpClient\HttpClientInterface $httpClient
+     *   The http client
      * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
      *   The mongodb document manager
      * @param $boundElasticsearchURL
      *   Url of Elasticsearch instance
      */
-    public function __construct(DocumentManager $documentManager, $boundElasticsearchURL)
+    public function __construct(HttpClientInterface $httpClient, DocumentManager $documentManager, $boundElasticsearchURL)
     {
         $this->documentManager = $documentManager;
         $this->elasticsearchURL = $boundElasticsearchURL;
+        $this->httpClient = $httpClient;
     }
 
     /**
@@ -37,9 +42,12 @@ class DataFakerService
      * @param \DateTime|null $date
      *   Date to create index of fake data for. Defaults to today.
      *
+     * @return bool
+     *
      * @throws \Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    public function createElasticsearchTestData(\DateTime $date = null)
+    public function createElasticsearchTestData(\DateTime $date = null): bool
     {
         if (null === $date) {
             $date = new \DateTime();
@@ -50,21 +58,8 @@ class DataFakerService
         $indexName = 'stats_'.$dateString;
         $path = $indexName;
 
-        $curlHandle = curl_init($this->elasticsearchURL.$path);
-        curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'PUT');
-        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($curlHandle);
-
-        $error = null;
-        if (false === $response) {
-            $error = curl_error($curlHandle);
-        }
-
-        curl_close($curlHandle);
-
-        if (null !== $error) {
-            throw new \Exception($error);
-        }
+        // Create index.
+        $this->httpClient->request('PUT', $this->elasticsearchURL.$path);
 
         $queries = [
             // Version 1 of stats logging:
@@ -92,28 +87,15 @@ class DataFakerService
             $document->datetime = $date->format(DATE_ISO8601);
             $jsonQuery = json_encode($document);
 
-            $curlHandle = curl_init($this->elasticsearchURL.$path.'/logs/');
-
-            curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $jsonQuery);
-            curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curlHandle, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Content-Length: '.strlen($jsonQuery),
+            $this->httpClient->request('POST', $this->elasticsearchURL.$path.'/logs/', [
+                'body' => $jsonQuery,
+                'headers' => [
+                    'Content-Type: application/json',
+                    'Content-Length: '.strlen($jsonQuery),
+                ],
             ]);
-            curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-            $response = curl_exec($curlHandle);
-
-            $error = null;
-            if (false === $response) {
-                $error = curl_error($curlHandle);
-            }
-
-            curl_close($curlHandle);
-
-            if (null !== $error) {
-                throw new \Exception($error);
-            }
         }
+
+        return true;
     }
 }
