@@ -44,8 +44,7 @@ class DataFakerService
      *
      * @return bool
      *
-     * @throws \Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \Throwable
      */
     public function createElasticsearchTestData(\DateTime $date = null): bool
     {

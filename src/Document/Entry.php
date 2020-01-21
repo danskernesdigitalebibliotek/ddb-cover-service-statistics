@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Entry document.
+ *
+ * Suppress phan false positive:
+ * @phan-file-suppress PhanUnreferencedUseNormal
+ */
+
 namespace App\Document;
 
 use ApiPlatform\Core\Annotation\ApiFilter;

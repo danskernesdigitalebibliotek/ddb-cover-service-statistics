@@ -47,11 +47,7 @@ class StatisticsExtractionService
      * Extract new statistics.
      *
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \Throwable
      */
     public function extractStatistics()
     {
