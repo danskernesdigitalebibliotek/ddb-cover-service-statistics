@@ -52,6 +52,8 @@ class FakeCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $io->warning('This will create fake content in elasticsearch. If you want to continue, enter a date below.');
+
         $date = $io->ask('Select a date (for example "7 december 2019" or "-2 days")?', 'today');
 
         $date = new \DateTime($date);

@@ -24,6 +24,14 @@ bin/console app:extract-statistics
 app:cleanup-entries 3
 ```
 
+## Development
+
+### Create fake content in elasticsearch
+
+```
+bin/console app:fake-content
+```
+
 ## Tests
 
 ### Run unit and functional tests
