@@ -253,6 +253,9 @@ class FunctionalTest extends ApiTestCase
         // Will not test run, since it asks a question.
     }
 
+    /**
+     * Test miscellaneous.
+     */
     public function testMisc()
     {
         $this->assertEquals([

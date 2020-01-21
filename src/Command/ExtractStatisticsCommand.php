@@ -26,7 +26,7 @@ class ExtractStatisticsCommand extends Command
      * ExtractStatisticsCommand constructor.
      *
      * @param \App\Service\StatisticsExtractionService $extractionService
-     * @param string|null $name               The name of the command; passing null means it must be set in configure()
+     * @param string|null $name              The name of the command; passing null means it must be set in configure()
      */
     public function __construct(StatisticsExtractionService $extractionService, string $name = null)
     {
