@@ -3,8 +3,12 @@
 namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\Command\CleanupEntriesCommand;
+use App\Command\ExtractStatisticsCommand;
+use App\Command\FakeCommand;
 use App\Document\Entry;
 use App\Document\ExtractionResult;
+use App\EventSubscriber\ResponseSubscriber;
 use App\Repository\ExtractionResultRepository;
 use App\Service\DataFakerService;
 use App\Service\ElasticsearchService;
@@ -12,8 +16,11 @@ use App\Service\ElasticsearchServiceMock;
 use App\Service\StatisticsExtractionService;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -23,6 +30,17 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class FunctionalTest extends ApiTestCase
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        self::bootKernel();
+
+        // Clean database
+        $this->cleanMongoDatabase();
+    }
+
     /**
      * Test that the Entry "get" collections endpoint works.
      *
@@ -45,12 +63,9 @@ class FunctionalTest extends ApiTestCase
      * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
     public function testExtractStatistics(): void
     {
-        self::bootKernel();
-
         // Get special container that allows fetching private services
         $container = self::$container;
 
@@ -59,9 +74,6 @@ class FunctionalTest extends ApiTestCase
         $logger = $container->get(LoggerInterface::class);
         $documentManager = $container->get(DocumentManager::class);
         $httpClient = $container->get(HttpClientInterface::class);
-
-        // Clean database
-        $this->cleanMongoDatabase();
 
         // Create an extraction result from yesterday, to only extract one day.
         $extractionResult = new ExtractionResult();
@@ -91,34 +103,45 @@ class FunctionalTest extends ApiTestCase
         $content = $response->toArray();
         $this->assertEquals(20, count($content['hydra:member']), 'Number of entries in response should be 20');
 
-        // After the results have been delivered, they should be removed from the database
-        // Assert that 0 Entry documents exist in the database.
-        $entries = $documentManager->getRepository(Entry::class)->findAll();
-        $this->assertEquals(0, count($entries), 'Number of entries in database should be 0');
-
         // Since an extraction was added before the extraction was run
         // we expect 2 ExtractionResults to exist in the database.
         $extractionResults = $documentManager->getRepository(ExtractionResult::class)->findAll();
         $this->assertEquals(2, count($extractionResults), 'Number of extraction results in database should be 2');
     }
 
+    /**
+     * Test Elasticsearch service.
+     *
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     public function testElasticsearchService()
     {
-        $expectedResult = [(object) [
-            'id' => 'firstHit',
-        ], ];
+        $expectedResult = [
+            (object) [
+                'id' => 'firstHit',
+            ],
+        ];
 
         $responses = [
             new MockResponse(),
-            new MockResponse(json_encode(
-                (object) ['hits' => (object) [
-                    'hits' => $expectedResult,
-                ], ]
-            ), [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                ],
-            ]),
+            new MockResponse(
+                json_encode(
+                    (object) [
+                        'hits' => (object) [
+                            'hits' => $expectedResult,
+                        ],
+                    ]
+                ),
+                [
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                    ],
+                ]
+            ),
         ];
 
         $clientMock = new MockHttpClient($responses);
@@ -129,10 +152,11 @@ class FunctionalTest extends ApiTestCase
         $this->assertEquals($expectedResult, $result, 'Result from elasticsearch does not match expected result');
     }
 
+    /**
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     public function testDataFakerService()
     {
-        self::bootKernel();
-
         // Get special container that allows fetching private services
         $container = self::$container;
         $documentManager = $container->get(DocumentManager::class);
@@ -150,6 +174,90 @@ class FunctionalTest extends ApiTestCase
         $dataFakerService = new DataFakerService($clientMock, $documentManager, 'http://elasticsearch:9200/');
         $result = $dataFakerService->createElasticsearchTestData(new \DateTime());
         $this->assertTrue($result, 'createElasticsearchTestData should finish executing');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCleanupEntries()
+    {
+        $container = self::$container;
+
+        $documentManager = $container->get(DocumentManager::class);
+        $httpClient = $container->get(HttpClientInterface::class);
+        $extractionResultRepository = $container->get(ExtractionResultRepository::class);
+        $logger = $container->get(LoggerInterface::class);
+
+        $elasticSearchServiceMock = new ElasticsearchServiceMock($httpClient, '');
+        $extractionService = new StatisticsExtractionService($documentManager, $extractionResultRepository, $logger, $elasticSearchServiceMock);
+
+        // Create test data
+        for ($i = 0; $i < 3; ++$i) {
+            $entry = new Entry();
+            $entry->setExtracted(true);
+            $entry->setExtractionDate(new \DateTime('-1 day'));
+            $documentManager->persist($entry);
+        }
+
+        $documentManager->flush();
+
+        // Run clean up with a past date compare point to confirm that the
+        // entries are not deleted.
+        $extractionService->removeExtractedEntries(new \DateTime('-4 days'));
+        $entries = $documentManager->getRepository(Entry::class)->findAll();
+        $this->assertEquals(3, count($entries), 'Number of extracted entries should equal 3');
+
+        // Run clean up with a futre date compare point to confirm that the
+        // entries are deleted.
+        $extractionService->removeExtractedEntries(new \DateTime('+1 day'));
+        $entries = $documentManager->getRepository(Entry::class)->findAll();
+        $this->assertEquals(0, count($entries), 'Number of extracted entries should equal 0');
+    }
+
+    /**
+     * Test the commands.
+     *
+     * @throws \Exception
+     */
+    public function testCommands()
+    {
+        $container = self::$container;
+
+        $documentManager = $container->get(DocumentManager::class);
+        $httpClient = $container->get(HttpClientInterface::class);
+        $extractionResultRepository = $container->get(ExtractionResultRepository::class);
+        $logger = $container->get(LoggerInterface::class);
+
+        $elasticSearchServiceMock = new ElasticsearchServiceMock($httpClient, '');
+        $extractionService = new StatisticsExtractionService($documentManager, $extractionResultRepository, $logger, $elasticSearchServiceMock);
+
+        // Test CleanupEntriesCommand.
+        $command = new CleanupEntriesCommand($extractionService);
+        $input = new ArrayInput([]);
+        $output = new NullOutput();
+        $result = $command->run($input, $output);
+        $this->assertEquals(0, $result, 'CleanupEntriesCommand should return 0');
+
+        // Test ExtractStatisticsCommand.
+        $command = new ExtractStatisticsCommand($extractionService);
+        $input = new ArrayInput([]);
+        $output = new NullOutput();
+        $command->run($input, $output);
+        $result = $command->run($input, $output);
+        $this->assertEquals(0, $result, 'CleanupEntriesCommand should return 0');
+
+        // Test FaktCommand.
+        $command = new FakeCommand(new DataFakerService($httpClient, $documentManager, ''));
+        $command->getDescription();
+        $this->assertEquals('Add fake data to elasticsearch', $command->getDescription(), 'Description should have been set.');
+        // Will not test run, since it asks a question.
+    }
+
+    public function testMisc()
+    {
+        $this->assertEquals([
+            ResponseEvent::class => 'onResponseEvent',
+        ], ResponseSubscriber::getSubscribedEvents(), 'ResponseSubscriber should subscribe to onResponseEvent');
     }
 
     /**

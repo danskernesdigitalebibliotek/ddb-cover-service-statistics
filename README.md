@@ -12,14 +12,30 @@ See the specification in `openapi/openapi.yaml` in the root of the installation 
 
 ## Commands
 
-### Extract entries from elasticsearch that are newer than latest extration.
+### Extract entries from elasticsearch that are newer than latest extraction date.
 
 ```
 bin/console app:extract-statistics
 ```
 
-### Remove already extracted entries
+### Remove already extracted entries that are more than 3 days old
 
 ```
-app:cleanup-entries
+app:cleanup-entries 3
 ```
+
+## Tests
+
+### Run unit and functional tests
+
+```
+composer phpunit
+```
+
+### Run tests and generate coverage report
+
+```
+composer phpunit-coverage
+```
+
+The report is found in the `coverage/report.txt` file.

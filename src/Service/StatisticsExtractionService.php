@@ -46,7 +46,12 @@ class StatisticsExtractionService
     /**
      * Extract new statistics.
      *
-     * @throws \Exception
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     public function extractStatistics()
     {
@@ -185,13 +190,25 @@ class StatisticsExtractionService
 
     /**
      * Remove already extracted entries.
+     *
+     * @param \DateTime $compareDate
+     *   Date to compare with. Entries extracted before $compareDate are removed
+     *
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
-    public function removeExtractedEntries()
+    public function removeExtractedEntries(\DateTime $compareDate)
     {
         $entries = $this->documentManager->getRepository(Entry::class)->findBy(['extracted' => true]);
 
+        /* @var Entry $entry */
         foreach ($entries as $entry) {
-            $this->documentManager->remove($entry);
+            if (null !== $entry->getExtracted() && null !== $entry->getExtractionDate()) {
+                $diff = (int) $entry->getExtractionDate()->diff($compareDate)->format('%a');
+
+                if (0 < $diff && $entry->getExtractionDate() < $compareDate) {
+                    $this->documentManager->remove($entry);
+                }
+            }
         }
 
         $this->documentManager->flush();

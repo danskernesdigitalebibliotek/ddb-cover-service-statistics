@@ -25,12 +25,12 @@ class ExtractStatisticsCommand extends Command
     /**
      * ExtractStatisticsCommand constructor.
      *
-     * @param \App\Service\StatisticsExtractionService $elasticsearchFaker
+     * @param \App\Service\StatisticsExtractionService $extractionService
      * @param string|null $name               The name of the command; passing null means it must be set in configure()
      */
-    public function __construct(StatisticsExtractionService $elasticsearchFaker, string $name = null)
+    public function __construct(StatisticsExtractionService $extractionService, string $name = null)
     {
-        $this->extractionService = $elasticsearchFaker;
+        $this->extractionService = $extractionService;
 
         parent::__construct($name);
     }
