@@ -26,7 +26,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  *
  * @ODM\Document(repositoryClass=App\Repository\EntryRepository::class)
  */
-class Entry implements \JsonSerializable
+class Entry
 {
     /**
      * @ODM\Id()
@@ -249,25 +249,5 @@ class Entry implements \JsonSerializable
     public function setElasticId($elasticId): void
     {
         $this->elasticId = $elasticId;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return [
-            'id' => $this->getId(),
-            'elasticId' => $this->getElasticId(),
-            'date' => $this->getDate(),
-            'clientId' => $this->getClientId(),
-            'agency' => $this->getAgency(),
-            'event' => $this->getEvent(),
-            'materialId' => $this->getMaterialId(),
-            'response' => $this->getResponse(),
-            'imageId' => $this->getImageId(),
-            'extracted' => $this->getExtracted(),
-            'extractionDate' => $this->getExtractionDate(),
-        ];
     }
 }

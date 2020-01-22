@@ -7,7 +7,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 /**
  * @ODM\Document(repositoryClass=App\Repository\ExtractionResultRepository::class)
  */
-class ExtractionResult implements \JsonSerializable
+class ExtractionResult
 {
     /**
      * @ODM\Id()
@@ -62,17 +62,5 @@ class ExtractionResult implements \JsonSerializable
     public function setNumberOfEntriesAdded($numberOfEntriesAdded): void
     {
         $this->numberOfEntriesAdded = $numberOfEntriesAdded;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return [
-            'id' => $this->getId(),
-            'date' => $this->getDate(),
-            'numberOfEntriesAdded' => $this->getNumberOfEntriesAdded(),
-        ];
     }
 }

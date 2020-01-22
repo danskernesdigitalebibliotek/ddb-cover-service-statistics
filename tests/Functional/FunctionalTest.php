@@ -142,6 +142,7 @@ class FunctionalTest extends ApiTestCase
                 json_encode(
                     (object) [
                         'hits' => (object) [
+                            'total' => 1,
                             'hits' => $expectedResult,
                         ],
                     ]
@@ -173,7 +174,7 @@ class FunctionalTest extends ApiTestCase
             new MockResponse('', ['http_code' => 200]),
         ];
 
-        for ($i = 0; $i < 20; ++$i) {
+        for ($i = 0; $i < 1000; ++$i) {
             $responses[] = new MockResponse('', ['http_code' => 200]);
         }
 
@@ -255,7 +256,7 @@ class FunctionalTest extends ApiTestCase
         $this->assertEquals(0, $result, 'CleanupEntriesCommand should return 0');
 
         $responses = [];
-        for ($i = 0; $i < 11; ++$i) {
+        for ($i = 0; $i < 1001; ++$i) {
             $responses[] = new MockResponse('', ['http_code' => 200]);
         }
         $clientMock = new MockHttpClient($responses);

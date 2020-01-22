@@ -113,9 +113,6 @@
         "actions/phan": [
             "./vendor/bin/phan --no-progress-bar --allow-polyfill-parser"
         ],
-        "actions/unittests": [
-            "./bin/phpunit tests/Unit"
-        ],
         "actions/functionaltests": [
             "./bin/phpunit tests/Functional"
         ]
