@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Class UnitTest.
  *
- * Contains unit tests for the App\Document\Entry.
+ * Contains unit tests.
  */
 class UnitTest extends TestCase
 {

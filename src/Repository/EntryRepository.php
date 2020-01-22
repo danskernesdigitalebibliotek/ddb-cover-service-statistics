@@ -29,4 +29,17 @@ class EntryRepository extends DocumentRepository
         $classMetaData = $documentManager->getClassMetadata(Entry::class);
         parent::__construct($documentManager, $uow, $classMetaData);
     }
+
+    /**
+     * Check if an entry with the given elasticId exists.
+     *
+     * @param string $elasticId
+     *   The _id field from elasticsearch entries
+     *
+     * @return bool
+     */
+    public function entryExists(string $elasticId): bool
+    {
+        return !empty($this->findOneBy(['elastidId' => $elasticId]));
+    }
 }

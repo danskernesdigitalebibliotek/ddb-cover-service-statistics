@@ -80,6 +80,14 @@ class StatisticsExtractionService
 
             // Add all to mongodb.
             foreach ($statistics as $statisticsEntry) {
+                $elasticId = $statisticsEntry->_id;
+                $agency = $statisticsEntry->_source->context->clientID;
+
+                // If entry has already been imported, continue.
+                if ($this->entryRepository->entryExists($elasticId)) {
+                    continue;
+                }
+
                 if (isset($statisticsEntry->_source->context->matches)) {
                     // Version 2 of statistics logging, where matches is set.
                     foreach ($statisticsEntry->_source->context->matches as $matchEntry) {
@@ -93,8 +101,8 @@ class StatisticsExtractionService
 
                         $entry = $this->createEntry(
                             new \DateTime($statisticsEntry->_source->datetime),
-                            $statisticsEntry->_id,
-                            $statisticsEntry->_source->context->clientID,
+                            $elasticId,
+                            $agency,
                             'request_image',
                             $matchEntry->identifier,
                             json_encode($response),
@@ -123,8 +131,8 @@ class StatisticsExtractionService
                     if (1 === count($searchIdentifiers) && 1 === count($fileNames)) {
                         $entry = $this->createEntry(
                             new \DateTime($statisticsEntry->_source->datetime),
-                            $statisticsEntry->_id,
-                            $statisticsEntry->_source->context->clientID,
+                            $elasticId,
+                            $agency,
                             'request_image',
                             array_pop($searchIdentifiers),
                             json_encode(['message' => 'ok']),
@@ -141,8 +149,8 @@ class StatisticsExtractionService
                         foreach ($searchIdentifiers as $identifier) {
                             $entry = $this->createEntry(
                                 new \DateTime($statisticsEntry->_source->datetime),
-                                $statisticsEntry->_id,
-                                $statisticsEntry->_source->context->clientID,
+                                $elasticId,
+                                $agency,
                                 'request_image',
                                 $identifier,
                                 json_encode(['message' => 'image not found']),
@@ -159,8 +167,8 @@ class StatisticsExtractionService
                     foreach ($searchIdentifiers as $identifier) {
                         $entry = $this->createEntry(
                             new \DateTime($statisticsEntry->_source->datetime),
-                            $statisticsEntry->_id,
-                            $statisticsEntry->_source->context->clientID,
+                            $elasticId,
+                            $agency,
                             'request_image',
                             $identifier,
                             json_encode(['message' => 'image maybe found']),
@@ -212,7 +220,7 @@ class StatisticsExtractionService
     }
 
     /**
-     * Create an entry.
+     * Check that an entry has not already been added and then creates an entry.
      *
      * @param \DateTime $date
      *   The date of the registration in elasticsearch
