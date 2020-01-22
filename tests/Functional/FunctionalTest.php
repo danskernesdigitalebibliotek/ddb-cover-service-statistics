@@ -9,11 +9,12 @@ use App\Command\FakeCommand;
 use App\Document\Entry;
 use App\Document\ExtractionResult;
 use App\EventSubscriber\ResponseSubscriber;
+use App\Repository\EntryRepository;
 use App\Repository\ExtractionResultRepository;
-use App\Service\ElasticsearchServiceInterface;
-use App\Test\DataFakerService;
 use App\Service\ElasticsearchService;
+use App\Service\ElasticsearchServiceInterface;
 use App\Service\StatisticsExtractionService;
+use App\Test\DataFakerService;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -21,7 +22,6 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Class FunctionalTest.
@@ -53,7 +53,7 @@ class FunctionalTest extends ApiTestCase
         $response = $client->request('GET', '/api/entries', [
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Accept'     => 'application/json',
+                'Accept' => 'application/json',
             ],
         ]);
 
@@ -73,6 +73,7 @@ class FunctionalTest extends ApiTestCase
         $container = self::$container;
 
         // Get services.
+        $entryRepository = $container->get(EntryRepository::class);
         $extractionResultRepository = $container->get(ExtractionResultRepository::class);
         $logger = $container->get(LoggerInterface::class);
         $documentManager = $container->get(DocumentManager::class);
@@ -93,7 +94,7 @@ class FunctionalTest extends ApiTestCase
             ->will($this->returnValue($mockResponse))
         ;
 
-        $extractionService = new StatisticsExtractionService($documentManager, $extractionResultRepository, $logger, $elasticSearchServiceMock);
+        $extractionService = new StatisticsExtractionService($documentManager, $entryRepository, $extractionResultRepository, $logger, $elasticSearchServiceMock);
 
         $extractionService->extractStatistics();
 
@@ -107,7 +108,7 @@ class FunctionalTest extends ApiTestCase
         $response = $client->request('GET', '/api/entries', [
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Accept'     => 'application/json',
+                'Accept' => 'application/json',
             ],
         ]);
         $this->assertEquals(200, $response->getStatusCode());
@@ -191,11 +192,12 @@ class FunctionalTest extends ApiTestCase
         $container = self::$container;
 
         $documentManager = $container->get(DocumentManager::class);
+        $entryRepository = $container->get(EntryRepository::class);
         $extractionResultRepository = $container->get(ExtractionResultRepository::class);
         $logger = $container->get(LoggerInterface::class);
 
         $elasticSearchServiceMock = $this->createMock(ElasticsearchServiceInterface::class);
-        $extractionService = new StatisticsExtractionService($documentManager, $extractionResultRepository, $logger, $elasticSearchServiceMock);
+        $extractionService = new StatisticsExtractionService($documentManager, $entryRepository, $extractionResultRepository, $logger, $elasticSearchServiceMock);
 
         // Create test data
         for ($i = 0; $i < 3; ++$i) {
@@ -231,10 +233,11 @@ class FunctionalTest extends ApiTestCase
 
         $documentManager = $container->get(DocumentManager::class);
         $extractionResultRepository = $container->get(ExtractionResultRepository::class);
+        $entryRepository = $container->get(EntryRepository::class);
         $logger = $container->get(LoggerInterface::class);
 
         $elasticSearchServiceMock = $this->createMock(ElasticsearchServiceInterface::class);
-        $extractionService = new StatisticsExtractionService($documentManager, $extractionResultRepository, $logger, $elasticSearchServiceMock);
+        $extractionService = new StatisticsExtractionService($documentManager, $entryRepository, $extractionResultRepository, $logger, $elasticSearchServiceMock);
 
         // Test CleanupEntriesCommand.
         $command = new CleanupEntriesCommand($extractionService);

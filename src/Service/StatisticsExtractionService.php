@@ -9,6 +9,7 @@ namespace App\Service;
 
 use App\Document\Entry;
 use App\Document\ExtractionResult;
+use App\Repository\EntryRepository;
 use App\Repository\ExtractionResultRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Log\LoggerInterface;
@@ -22,12 +23,15 @@ class StatisticsExtractionService
     private $logger;
     private $extractionResultRepository;
     private $elasticsearchService;
+    private $entryRepository;
 
     /**
      * StatisticsExtractionService constructor.
      *
      * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
      *   The document manager
+     * @param \App\Repository\EntryRepository $entryRepository
+     *   Repository for Entry documents
      * @param \App\Repository\ExtractionResultRepository $extractionResultRepository
      *   Repository for ExtractResult documents
      * @param \Psr\Log\LoggerInterface $logger
@@ -35,12 +39,13 @@ class StatisticsExtractionService
      * @param \App\Service\ElasticsearchServiceInterface $elasticsearchService
      *   Service to integrate with elasticsearch
      */
-    public function __construct(DocumentManager $documentManager, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, ElasticsearchServiceInterface $elasticsearchService)
+    public function __construct(DocumentManager $documentManager, EntryRepository $entryRepository, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, ElasticsearchServiceInterface $elasticsearchService)
     {
         $this->documentManager = $documentManager;
         $this->logger = $logger;
         $this->elasticsearchService = $elasticsearchService;
         $this->extractionResultRepository = $extractionResultRepository;
+        $this->entryRepository = $entryRepository;
     }
 
     /**
@@ -66,7 +71,7 @@ class StatisticsExtractionService
         $numberOfEntriesAdded = 0;
 
         // Extract logs for all dates from latest extraction date to yesterday.
-        // Create all as Entries in the database.
+        // Create all as Entry documents in the database.
         while ($numberOfDaysToSearch > 0) {
             $dayToSearch = new \DateTime('-'.($numberOfDaysToSearch - 1).' days');
 
@@ -190,7 +195,7 @@ class StatisticsExtractionService
      */
     public function removeExtractedEntries(\DateTime $compareDate)
     {
-        $entries = $this->documentManager->getRepository(Entry::class)->findBy(['extracted' => true]);
+        $entries = $this->entryRepository->findBy(['extracted' => true]);
 
         /* @var Entry $entry */
         foreach ($entries as $entry) {

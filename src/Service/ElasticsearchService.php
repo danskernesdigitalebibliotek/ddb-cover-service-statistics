@@ -44,7 +44,7 @@ class ElasticsearchService implements ElasticsearchServiceInterface
      *
      * @throws \Throwable
      */
-    public function getLogsFromElasticsearch(\DateTime $date, string $message) : array
+    public function getLogsFromElasticsearch(\DateTime $date, string $message): array
     {
         $dateString = $date->format('d-m-Y');
 

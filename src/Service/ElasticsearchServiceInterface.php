@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Service;
-
 
 interface ElasticsearchServiceInterface
 {
@@ -17,5 +15,5 @@ interface ElasticsearchServiceInterface
      * @return array
      *   Array of logs for the given date
      */
-    function getLogsFromElasticsearch(\DateTime $date, string $message) : array;
+    public function getLogsFromElasticsearch(\DateTime $date, string $message): array;
 }
