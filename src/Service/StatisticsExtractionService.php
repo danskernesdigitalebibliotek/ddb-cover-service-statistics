@@ -51,30 +51,32 @@ class StatisticsExtractionService
      */
     public function extractStatistics()
     {
+        $today = new \DateTime();
+
         // Get latest extraction entry. Default to first day of production.
         /* @var ExtractionResult $lastExtraction */
         $lastExtraction = $this->extractionResultRepository->getNewestEntry();
 
-        // @TODO: Set correct date of first stats entry
+        // Default to 1. december 2019 to make sure we extract all statistics from the start of production.
         /* @var \DateTime $latestExtractionDate */
         $latestExtractionDate = $lastExtraction ? $lastExtraction->getDate() : new \Datetime('1 december 2019');
 
-        $today = new \DateTime();
         $numberOfDaysToSearch = (int) $today->diff($latestExtractionDate)->format('%a');
 
         $numberOfEntriesAdded = 0;
 
         // Extract logs for all dates from latest extraction date to yesterday.
-        // Craete all as Entries in the database.
+        // Create all as Entries in the database.
         while ($numberOfDaysToSearch > 0) {
             $dayToSearch = new \DateTime('-'.($numberOfDaysToSearch - 1).' days');
 
+            // Get entries from elasticsearch index.
             $statistics = $this->elasticsearchService->getLogsFromElasticsearch($dayToSearch, 'Cover request/response');
 
             // Add all to mongodb.
             foreach ($statistics as $statisticsEntry) {
-                // Version 2 of statistics logging, where matches is set.
                 if (isset($statisticsEntry->_source->context->matches)) {
+                    // Version 2 of statistics logging, where matches is set.
                     foreach ($statisticsEntry->_source->context->matches as $matchEntry) {
                         $response = [];
 
@@ -84,23 +86,20 @@ class StatisticsExtractionService
                             $response['message'] = 'ok';
                         }
 
-                        // Create entry.
-                        $entry = new Entry();
-                        $entry->setDate(new \DateTime($statisticsEntry->_source->datetime));
-                        $entry->setAgency($statisticsEntry->_source->context->clientID);
-                        $entry->setClientId('CoverService');
-                        $entry->setImageId($matchEntry->match);
-                        $entry->setMaterialId($matchEntry->identifier);
-                        $entry->setEvent('request_image');
-                        $entry->setResponse(json_encode($response));
-                        $entry->setExtracted(false);
-
+                        $entry = $this->createEntry(
+                            new \DateTime($statisticsEntry->_source->datetime),
+                            $statisticsEntry->_id,
+                            $statisticsEntry->_source->context->clientID,
+                            'request_image',
+                            $matchEntry->identifier,
+                            json_encode($response),
+                            $matchEntry->match
+                        );
                         $this->documentManager->persist($entry);
                         ++$numberOfEntriesAdded;
                     }
                 } else {
                     // Version 1 of statistics logging, where matches is not set.
-
                     $fileNames = $statisticsEntry->_source->context->fileNames ?? [];
                     $searchIdentifiers = [];
 
@@ -117,16 +116,15 @@ class StatisticsExtractionService
                     // If only searching for one identifier and only finding on file
                     // create success entry.
                     if (1 === count($searchIdentifiers) && 1 === count($fileNames)) {
-                        $entry = new Entry();
-                        $entry->setDate(new \DateTime($statisticsEntry->_source->datetime));
-                        $entry->setAgency($statisticsEntry->_source->context->clientID);
-                        $entry->setClientId('CoverService');
-                        $entry->setImageId(array_pop($fileNames));
-                        $entry->setMaterialId(array_pop($searchIdentifiers));
-                        $entry->setEvent('request_image');
-                        $entry->setResponse(json_encode(['message' => 'ok']));
-                        $entry->setExtracted(false);
-
+                        $entry = $this->createEntry(
+                            new \DateTime($statisticsEntry->_source->datetime),
+                            $statisticsEntry->_id,
+                            $statisticsEntry->_source->context->clientID,
+                            'request_image',
+                            array_pop($searchIdentifiers),
+                            json_encode(['message' => 'ok']),
+                            array_pop($fileNames)
+                        );
                         $this->documentManager->persist($entry);
                         ++$numberOfEntriesAdded;
 
@@ -136,16 +134,15 @@ class StatisticsExtractionService
                     // If fileNames is empty report failure for each identifier.
                     if (0 === count($fileNames)) {
                         foreach ($searchIdentifiers as $identifier) {
-                            $entry = new Entry();
-                            $entry->setDate(new \DateTime($statisticsEntry->_source->datetime));
-                            $entry->setAgency($statisticsEntry->_source->context->clientID);
-                            $entry->setClientId('CoverService');
-                            $entry->setImageId(null);
-                            $entry->setMaterialId($identifier);
-                            $entry->setEvent('request_image');
-                            $entry->setResponse(json_encode(['image not found']));
-                            $entry->setExtracted(false);
-
+                            $entry = $this->createEntry(
+                                new \DateTime($statisticsEntry->_source->datetime),
+                                $statisticsEntry->_id,
+                                $statisticsEntry->_source->context->clientID,
+                                'request_image',
+                                $identifier,
+                                json_encode(['message' => 'image not found']),
+                                null
+                            );
                             $this->documentManager->persist($entry);
                             ++$numberOfEntriesAdded;
                         }
@@ -155,16 +152,15 @@ class StatisticsExtractionService
 
                     // Otherwise, report results as undetermined.
                     foreach ($searchIdentifiers as $identifier) {
-                        $entry = new Entry();
-                        $entry->setDate(new \DateTime($statisticsEntry->_source->datetime));
-                        $entry->setAgency($statisticsEntry->_source->context->clientID);
-                        $entry->setClientId('CoverService');
-                        $entry->setImageId('undetermined');
-                        $entry->setMaterialId($identifier);
-                        $entry->setEvent('request_image');
-                        $entry->setResponse(json_encode(['image maybe found']));
-                        $entry->setExtracted(false);
-
+                        $entry = $this->createEntry(
+                            new \DateTime($statisticsEntry->_source->datetime),
+                            $statisticsEntry->_id,
+                            $statisticsEntry->_source->context->clientID,
+                            'request_image',
+                            $identifier,
+                            json_encode(['message' => 'image maybe found']),
+                            'undetermined'
+                        );
                         $this->documentManager->persist($entry);
                         ++$numberOfEntriesAdded;
                     }
@@ -208,5 +204,42 @@ class StatisticsExtractionService
         }
 
         $this->documentManager->flush();
+    }
+
+    /**
+     * Create an entry.
+     *
+     * @param \DateTime $date
+     *   The date of the registration in elasticsearch
+     * @param string $elasticId
+     *   The id of the entry in elasticsearch
+     * @param string $agency
+     *   The agency connected with the event
+     * @param string $event
+     *   The event
+     * @param string $materialId
+     *   The material id of the event
+     * @param string $response
+     *   The response
+     * @param string|null $imageId
+     *   The image id
+     *
+     * @return \App\Document\Entry
+     */
+    private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, string $materialId, string $response, ?string $imageId): Entry
+    {
+        $entry = new Entry();
+
+        $entry->setDate($date);
+        $entry->setElasticId($elasticId);
+        $entry->setClientId('CoverService');
+        $entry->setAgency($agency);
+        $entry->setEvent($event);
+        $entry->setMaterialId($materialId);
+        $entry->setResponse($response);
+        $entry->setImageId($imageId);
+        $entry->setExtracted(false);
+
+        return $entry;
     }
 }

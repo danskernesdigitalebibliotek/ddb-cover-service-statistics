@@ -9,6 +9,7 @@ namespace App\Command;
 
 use App\Service\DataFakerService;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -43,6 +44,7 @@ class FakeCommand extends Command
     protected function configure()
     {
         $this->setDescription('Add fake data to elasticsearch');
+        $this->addArgument('date', InputArgument::OPTIONAL, 'Day to add entries to');
     }
 
     /**
@@ -52,11 +54,15 @@ class FakeCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $io->warning('This will create fake content in elasticsearch. If you want to continue, enter a date below.');
+        $dateString = $input->getArgument('date');
 
-        $date = $io->ask('Select a date (for example "7 december 2019" or "-2 days")?', 'today');
+        if (null === $dateString) {
+            $io->warning('This will create fake content in elasticsearch. If you want to continue, enter a date below.');
 
-        $date = new \DateTime($date);
+            $dateString = $io->ask('Select a date (for example "7 december 2019" or "-2 days"). Defaults to today.', 'today');
+        }
+
+        $date = new \DateTime($dateString);
 
         $this->fakerService->createElasticsearchTestData($date);
 

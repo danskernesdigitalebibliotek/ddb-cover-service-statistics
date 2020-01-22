@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains repository for ExtractionResult documents.
+ */
+
 namespace App\Repository;
 
 use App\Document\ExtractionResult;
@@ -19,6 +24,7 @@ class ExtractionResultRepository extends DocumentRepository
      */
     public function __construct(DocumentManager $documentManager)
     {
+        // Because it cannot be auto-wired.
         $uow = $documentManager->getUnitOfWork();
         $classMetaData = $documentManager->getClassMetadata(ExtractionResult::class);
         parent::__construct($documentManager, $uow, $classMetaData);

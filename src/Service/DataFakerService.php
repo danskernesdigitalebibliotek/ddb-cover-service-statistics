@@ -7,7 +7,6 @@
 
 namespace App\Service;
 
-use Doctrine\ODM\MongoDB\DocumentManager;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -16,7 +15,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class DataFakerService
 {
     private $elasticsearchURL;
-    private $documentManager;
     private $httpClient;
 
     /**
@@ -24,14 +22,11 @@ class DataFakerService
      *
      * @param \Symfony\Contracts\HttpClient\HttpClientInterface $httpClient
      *   The http client
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     *   The mongodb document manager
      * @param $boundElasticsearchURL
      *   Url of Elasticsearch instance
      */
-    public function __construct(HttpClientInterface $httpClient, DocumentManager $documentManager, $boundElasticsearchURL)
+    public function __construct(HttpClientInterface $httpClient, $boundElasticsearchURL)
     {
-        $this->documentManager = $documentManager;
         $this->elasticsearchURL = $boundElasticsearchURL;
         $this->httpClient = $httpClient;
     }

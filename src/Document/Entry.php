@@ -24,7 +24,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  * @ApiFilter(DateFilter::class, properties={"date"})
  * @ApiFilter(BooleanFilter::class, properties={"extracted"})
  *
- * @ODM\Document
+ * @ODM\Document(repositoryClass=App\Repository\EntryRepository::class)
  */
 class Entry implements \JsonSerializable
 {
@@ -37,6 +37,11 @@ class Entry implements \JsonSerializable
      * @ODM\Field(type="date")
      */
     protected $date;
+
+    /**
+     * @ODM\Field(type="string")
+     */
+    protected $elasticId;
 
     /**
      * @ODM\Field(type="string")
@@ -231,12 +236,29 @@ class Entry implements \JsonSerializable
     }
 
     /**
+     * @return mixed
+     */
+    public function getElasticId()
+    {
+        return $this->elasticId;
+    }
+
+    /**
+     * @param mixed $elasticId
+     */
+    public function setElasticId($elasticId): void
+    {
+        $this->elasticId = $elasticId;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function jsonSerialize()
     {
         return [
             'id' => $this->getId(),
+            'elasticId' => $this->getElasticId(),
             'date' => $this->getDate(),
             'clientId' => $this->getClientId(),
             'agency' => $this->getAgency(),

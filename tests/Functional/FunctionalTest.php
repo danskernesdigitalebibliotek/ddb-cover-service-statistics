@@ -50,7 +50,7 @@ class FunctionalTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $response = $client->request('GET', '/entries');
+        $response = $client->request('GET', '/api/entries');
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -96,7 +96,7 @@ class FunctionalTest extends ApiTestCase
 
         // Assert that the entries can be extracted from the API.
         $client = static::createClient();
-        $response = $client->request('GET', '/entries');
+        $response = $client->request('GET', '/api/entries');
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
@@ -112,11 +112,7 @@ class FunctionalTest extends ApiTestCase
     /**
      * Test Elasticsearch service.
      *
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \Throwable
      */
     public function testElasticsearchService()
     {
@@ -153,14 +149,12 @@ class FunctionalTest extends ApiTestCase
     }
 
     /**
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * Test DateFakerService.
+     *
+     * @throws \Throwable
      */
     public function testDataFakerService()
     {
-        // Get special container that allows fetching private services
-        $container = self::$container;
-        $documentManager = $container->get(DocumentManager::class);
-
         $responses = [
             new MockResponse('', ['http_code' => 200]),
         ];
@@ -171,7 +165,7 @@ class FunctionalTest extends ApiTestCase
 
         $clientMock = new MockHttpClient($responses);
 
-        $dataFakerService = new DataFakerService($clientMock, $documentManager, 'http://elasticsearch:9200/');
+        $dataFakerService = new DataFakerService($clientMock, 'http://elasticsearch:9200/');
         $result = $dataFakerService->createElasticsearchTestData(new \DateTime());
         $this->assertTrue($result, 'createElasticsearchTestData should finish executing');
     }
@@ -246,11 +240,21 @@ class FunctionalTest extends ApiTestCase
         $result = $command->run($input, $output);
         $this->assertEquals(0, $result, 'CleanupEntriesCommand should return 0');
 
-        // Test FaktCommand.
-        $command = new FakeCommand(new DataFakerService($httpClient, $documentManager, ''));
-        $command->getDescription();
+        $responses = [];
+        for ($i = 0; $i < 11; ++$i) {
+            $responses[] = new MockResponse('', ['http_code' => 200]);
+        }
+        $clientMock = new MockHttpClient($responses);
+
+        // Test FakeCommand.
+        $command = new FakeCommand(new DataFakerService($clientMock, 'http://elasticsearch:9200/'));
         $this->assertEquals('Add fake data to elasticsearch', $command->getDescription(), 'Description should have been set.');
-        // Will not test run, since it asks a question.
+        $input = new ArrayInput([
+            'date' => 'today',
+        ]);
+        $output = new NullOutput();
+        $result = $command->run($input, $output);
+        $this->assertEquals(0, $result, 'FakeCommand should return 0');
     }
 
     /**
