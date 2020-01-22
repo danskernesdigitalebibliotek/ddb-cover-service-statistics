@@ -182,7 +182,7 @@ class StatisticsExtractionService
                 }
 
                 // Flush when batch size is reached to avoid memory buildup.
-                if ($numberOfEntriesAdded > 0 && $numberOfEntriesAdded % self::BATCH_SIZE == 0) {
+                if ($numberOfEntriesAdded > 0 && 0 == $numberOfEntriesAdded % self::BATCH_SIZE) {
                     $this->documentManager->flush();
                 }
             }
