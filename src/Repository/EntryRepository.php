@@ -40,6 +40,6 @@ class EntryRepository extends DocumentRepository
      */
     public function entryExists(string $elasticId): bool
     {
-        return !empty($this->findOneBy(['elastidId' => $elasticId]));
+        return !empty($this->findOneBy(['elasticId' => $elasticId]));
     }
 }

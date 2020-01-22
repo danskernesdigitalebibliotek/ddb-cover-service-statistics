@@ -19,6 +19,8 @@ use Psr\Log\LoggerInterface;
  */
 class StatisticsExtractionService
 {
+    protected const BATCH_SIZE = 50;
+
     private $documentManager;
     private $logger;
     private $extractionResultRepository;
@@ -178,19 +180,24 @@ class StatisticsExtractionService
                         ++$numberOfEntriesAdded;
                     }
                 }
+
+                // Flush when batch size is reached to avoid memory buildup.
+                if ($numberOfEntriesAdded > 0 && $numberOfEntriesAdded % self::BATCH_SIZE == 0) {
+                    $this->documentManager->flush();
+                }
             }
+
+            // Save new extraction result.
+            $extractionResult = new ExtractionResult();
+            $extractionResult->setDate($dayToSearch);
+            $extractionResult->setNumberOfEntriesAdded($numberOfEntriesAdded);
+            $this->documentManager->persist($extractionResult);
+
+            // Flush to database.
+            $this->documentManager->flush();
 
             --$numberOfDaysToSearch;
         }
-
-        // Save new extraction result.
-        $extractionResult = new ExtractionResult();
-        $extractionResult->setDate(new \DateTime());
-        $extractionResult->setNumberOfEntriesAdded($numberOfEntriesAdded);
-        $this->documentManager->persist($extractionResult);
-
-        // Flush to database.
-        $this->documentManager->flush();
     }
 
     /**
