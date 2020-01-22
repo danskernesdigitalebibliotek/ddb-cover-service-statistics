@@ -12,7 +12,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 /**
  * Class ElasticsearchService.
  */
-class ElasticsearchService
+class ElasticsearchService implements ElasticsearchServiceInterface
 {
     private $elasticsearchURL;
     private $httpClient;
@@ -44,7 +44,7 @@ class ElasticsearchService
      *
      * @throws \Throwable
      */
-    public function getLogsFromElasticsearch(\DateTime $date, string $message)
+    public function getLogsFromElasticsearch(\DateTime $date, string $message) : array
     {
         $dateString = $date->format('d-m-Y');
 

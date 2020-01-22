@@ -5,7 +5,7 @@
  * Contains ElasticsearchFaker that creates test data in Elasticsearch.
  */
 
-namespace App\Service;
+namespace App\Test;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 

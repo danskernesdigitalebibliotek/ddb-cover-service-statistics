@@ -32,10 +32,10 @@ class StatisticsExtractionService
      *   Repository for ExtractResult documents
      * @param \Psr\Log\LoggerInterface $logger
      *   The logger
-     * @param \App\Service\ElasticsearchService $elasticsearchService
+     * @param \App\Service\ElasticsearchServiceInterface $elasticsearchService
      *   Service to integrate with elasticsearch
      */
-    public function __construct(DocumentManager $documentManager, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, ElasticsearchService $elasticsearchService)
+    public function __construct(DocumentManager $documentManager, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, ElasticsearchServiceInterface $elasticsearchService)
     {
         $this->documentManager = $documentManager;
         $this->logger = $logger;

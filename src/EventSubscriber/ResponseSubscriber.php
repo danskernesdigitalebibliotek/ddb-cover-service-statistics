@@ -55,11 +55,6 @@ class ResponseSubscriber implements EventSubscriberInterface
             Entry::class === $request->attributes->get('_api_resource_class')) {
             $results = json_decode($event->getResponse()->getContent());
 
-            // If it is an json:ld request.
-            if (isset($results->{'hydra:member'})) {
-                $results = $results->{'hydra:member'};
-            }
-
             $ids = array_reduce($results, function ($carry, $element) {
                 $carry[] = $element->id;
 

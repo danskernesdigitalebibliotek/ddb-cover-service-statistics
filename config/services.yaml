@@ -21,3 +21,6 @@ services:
     App\:
         resource: '../src/*'
         exclude: '../src/{DependencyInjection,Document,Entity,Migrations,Tests,Kernel.php}'
+
+    App\Service\ElasticsearchServiceInterface:
+        class: App\Service\ElasticsearchService
