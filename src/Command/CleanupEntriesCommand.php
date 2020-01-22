@@ -26,12 +26,12 @@ class CleanupEntriesCommand extends Command
     /**
      * CleanupEntriesCommand constructor.
      *
-     * @param \App\Service\StatisticsExtractionService $extractionService
+     * @param \App\Service\StatisticsExtractionService $fakerService
      *   The statistics extration service
      */
-    public function __construct(StatisticsExtractionService $extractionService)
+    public function __construct(StatisticsExtractionService $fakerService)
     {
-        $this->extractionService = $extractionService;
+        $this->extractionService = $fakerService;
 
         parent::__construct();
     }

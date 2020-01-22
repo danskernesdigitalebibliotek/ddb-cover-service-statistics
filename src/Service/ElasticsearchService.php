@@ -14,6 +14,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class ElasticsearchService implements ElasticsearchServiceInterface
 {
+    private const SEARCH_SIZE = 100;
+
     private $elasticsearchURL;
     private $httpClient;
 
@@ -51,15 +53,13 @@ class ElasticsearchService implements ElasticsearchServiceInterface
         $indexName = 'stats_'.$dateString;
         $path = $indexName.'/_search';
 
-        $jsonQuery = json_encode(
-            (object) [
-                'query' => (object) [
-                    'match' => (object) [
-                        'message' => $message,
-                    ],
+        $query = (object) [
+            'query' => (object) [
+                'match' => (object) [
+                    'message' => $message,
                 ],
-            ]
-        );
+            ],
+        ];
 
         $indexExists = $this->httpClient->request('HEAD', $this->elasticsearchURL.$indexName)->getStatusCode();
 
@@ -67,16 +67,30 @@ class ElasticsearchService implements ElasticsearchServiceInterface
             return [];
         }
 
-        $response = $this->httpClient->request('POST', $this->elasticsearchURL.$path, [
-            'body' => $jsonQuery,
-            'headers' => [
-                'Content-Type: application/json',
-                'Content-Length: '.strlen($jsonQuery),
-            ],
-        ]);
+        $index = 0;
+        $results = [];
 
-        $result = json_decode($response->getContent());
+        do {
+            $jsonQuery = json_encode($query);
 
-        return $result->hits->hits ?? [];
+            $response = $this->httpClient->request('POST', $this->elasticsearchURL.$path, [
+                'query' => [
+                    'from' => $index,
+                    'size' => self::SEARCH_SIZE,
+                ],
+                'body' => $jsonQuery,
+                'headers' => [
+                    'Content-Type: application/json',
+                    'Content-Length: '.strlen($jsonQuery),
+                ],
+            ]);
+
+            $result = json_decode($response->getContent());
+            $results = array_merge($results, $result->hits->hits ?? []);
+
+            $index = $index + self::SEARCH_SIZE;
+        } while ($result->hits->total > $index);
+
+        return $results;
     }
 }

@@ -81,13 +81,16 @@ class DataFakerService
             $document->datetime = $date->format(DATE_ISO8601);
             $jsonQuery = json_encode($document);
 
-            $this->httpClient->request('POST', $this->elasticsearchURL.$path.'/logs/', [
-                'body' => $jsonQuery,
-                'headers' => [
-                    'Content-Type: application/json',
-                    'Content-Length: '.strlen($jsonQuery),
-                ],
-            ]);
+            // Create 100 of each of entry.
+            for ($i = 0; $i < 100; ++$i) {
+                $this->httpClient->request('POST', $this->elasticsearchURL.$path.'/logs/', [
+                    'body' => $jsonQuery,
+                    'headers' => [
+                        'Content-Type: application/json',
+                        'Content-Length: '.strlen($jsonQuery),
+                    ],
+                ]);
+            }
         }
 
         return true;

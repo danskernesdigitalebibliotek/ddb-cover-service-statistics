@@ -80,8 +80,19 @@ class StatisticsExtractionService
             // Get entries from elasticsearch index.
             $statistics = $this->elasticsearchService->getLogsFromElasticsearch($dayToSearch, 'Cover request/response');
 
+            $nextBatchLimit = self::BATCH_SIZE;
+
             // Add all to mongodb.
             foreach ($statistics as $statisticsEntry) {
+                // Flush when batch size is exceeded to avoid memory buildup.
+                if (0 < $numberOfEntriesAdded && $numberOfEntriesAdded > $nextBatchLimit) {
+                    $nextBatchLimit = $nextBatchLimit + self::BATCH_SIZE;
+                    $this->documentManager->flush();
+                    $this->documentManager->clear();
+
+                    gc_collect_cycles();
+                }
+
                 $elasticId = $statisticsEntry->_id;
                 $agency = $statisticsEntry->_source->context->clientID;
 
@@ -179,11 +190,6 @@ class StatisticsExtractionService
                         $this->documentManager->persist($entry);
                         ++$numberOfEntriesAdded;
                     }
-                }
-
-                // Flush when batch size is reached to avoid memory buildup.
-                if ($numberOfEntriesAdded > 0 && 0 == $numberOfEntriesAdded % self::BATCH_SIZE) {
-                    $this->documentManager->flush();
                 }
             }
 

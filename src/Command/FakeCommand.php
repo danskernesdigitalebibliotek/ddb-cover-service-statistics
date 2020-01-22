@@ -26,14 +26,14 @@ class FakeCommand extends Command
     /**
      * ExtractStatisticsCommand constructor.
      *
-     * @param \App\Service\DataFakerService $extractionService
+     * @param \App\Test\DataFakerService $fakerService
      *   The faker service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()
      */
-    public function __construct(DataFakerService $extractionService, string $name = null)
+    public function __construct(DataFakerService $fakerService, string $name = null)
     {
-        $this->fakerService = $extractionService;
+        $this->fakerService = $fakerService;
 
         parent::__construct($name);
     }

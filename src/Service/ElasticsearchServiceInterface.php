@@ -1,7 +1,15 @@
 <?php
 
+/**
+ * @file
+ * Contains interface for elasticsearch service.
+ */
+
 namespace App\Service;
 
+/**
+ * Interface ElasticsearchServiceInterface.
+ */
 interface ElasticsearchServiceInterface
 {
     /**
