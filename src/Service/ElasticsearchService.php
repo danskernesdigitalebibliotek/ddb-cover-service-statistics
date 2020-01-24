@@ -44,7 +44,10 @@ class ElasticsearchService implements ElasticsearchServiceInterface
      * @return array
      *   Array of logs for the given date
      *
-     * @throws \Throwable
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     public function getLogsFromElasticsearch(\DateTime $date, string $message): array
     {

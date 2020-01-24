@@ -54,7 +54,6 @@ class StatisticsExtractionService
      * Extract new statistics.
      *
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
-     * @throws \Throwable
      */
     public function extractStatistics()
     {
@@ -232,10 +231,10 @@ class StatisticsExtractionService
                 if (0 < $diff && $entry->getExtractionDate() < $compareDate) {
                     $this->documentManager->remove($entry);
 
-                    $entriesRemoved++;
+                    ++$entriesRemoved;
 
                     // Flush when batch size is exceeded to avoid memory buildup.
-                    if ($entriesRemoved % self::BATCH_SIZE === 0) {
+                    if (0 === $entriesRemoved % self::BATCH_SIZE) {
                         $this->documentManager->flush();
                     }
                 }
