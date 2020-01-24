@@ -63,7 +63,8 @@ class StatisticsExtractionService
         /* @var ExtractionResult $lastExtraction */
         $lastExtraction = $this->extractionResultRepository->getNewestEntry();
 
-        // Default to 1. december 2019 to make sure we extract all statistics from the start of production.
+        // Default to 1. december 2019 to make sure we extract all statistics
+        // from the start of production of CoverService.
         /* @var \DateTime $latestExtractionDate */
         $latestExtractionDate = $lastExtraction ? $lastExtraction->getDate() : new \Datetime('1 december 2019');
 
@@ -86,7 +87,7 @@ class StatisticsExtractionService
             // Add all to mongodb.
             foreach ($statistics as $statisticsEntry) {
                 // Flush when batch size is exceeded to avoid memory buildup.
-                if (0 < $entriesAdded && $entriesAdded > $nextBatchLimit) {
+                if ($entriesAdded > $nextBatchLimit) {
                     $nextBatchLimit = $nextBatchLimit + self::BATCH_SIZE;
                     $this->documentManager->flush();
                     $this->documentManager->clear();
