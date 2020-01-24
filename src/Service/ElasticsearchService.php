@@ -46,6 +46,7 @@ class ElasticsearchService implements ElasticsearchServiceInterface
      *
      * Suppress phan false positive:
      * @phan-file-suppress PhanTypeInvalidThrowsIsInterface
+     *
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
