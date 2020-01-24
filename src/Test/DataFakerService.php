@@ -39,6 +39,8 @@ class DataFakerService
      *
      * @return bool
      *
+     * Suppress phan false positive:
+     * @phan-file-suppress PhanTypeInvalidThrowsIsInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     public function createElasticsearchTestData(\DateTime $date = null): bool

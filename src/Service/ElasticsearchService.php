@@ -44,6 +44,8 @@ class ElasticsearchService implements ElasticsearchServiceInterface
      * @return array
      *   Array of logs for the given date
      *
+     * Suppress phan false positive:
+     * @phan-file-suppress PhanTypeInvalidThrowsIsInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
