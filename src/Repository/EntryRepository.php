@@ -24,7 +24,8 @@ class EntryRepository extends DocumentRepository
      */
     public function __construct(DocumentManager $documentManager)
     {
-        // Because it cannot be auto-wired.
+        // Because unit of work and class meta data are not injectable we
+        // manually inject them.
         $uow = $documentManager->getUnitOfWork();
         $classMetaData = $documentManager->getClassMetadata(Entry::class);
         parent::__construct($documentManager, $uow, $classMetaData);

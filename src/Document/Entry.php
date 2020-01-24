@@ -84,7 +84,7 @@ class Entry
     protected $extracted;
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getId()
     {
@@ -92,15 +92,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return \DateTime
      */
-    public function getDate()
+    public function getDate(): \DateTime
     {
         return $this->date;
     }
 
     /**
-     * @param mixed $date
+     * @param \DateTime $date
      */
     public function setDate($date): void
     {
@@ -108,15 +108,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getClientId()
+    public function getClientId(): string
     {
         return $this->clientId;
     }
 
     /**
-     * @param mixed $clientId
+     * @param string $clientId
      */
     public function setClientId($clientId): void
     {
@@ -124,15 +124,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getAgency()
+    public function getAgency(): string
     {
         return $this->agency;
     }
 
     /**
-     * @param mixed $agency
+     * @param string $agency
      */
     public function setAgency($agency): void
     {
@@ -140,15 +140,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getEvent()
+    public function getEvent(): string
     {
         return $this->event;
     }
 
     /**
-     * @param mixed $event
+     * @param string $event
      */
     public function setEvent($event): void
     {
@@ -156,9 +156,9 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getMaterialId()
+    public function getMaterialId(): string
     {
         return $this->materialId;
     }
@@ -172,15 +172,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getResponse()
+    public function getResponse(): string
     {
         return $this->response;
     }
 
     /**
-     * @param mixed $response
+     * @param string $response
      */
     public function setResponse($response): void
     {
@@ -188,15 +188,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
-    public function getImageId()
+    public function getImageId(): ?string
     {
         return $this->imageId;
     }
 
     /**
-     * @param mixed $imageId
+     * @param string $imageId
      */
     public function setImageId($imageId): void
     {
@@ -204,15 +204,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function getExtracted()
+    public function getExtracted(): bool
     {
         return $this->extracted;
     }
 
     /**
-     * @param mixed $extracted
+     * @param bool $extracted
      */
     public function setExtracted($extracted): void
     {
@@ -220,15 +220,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return \DateTime|null
      */
-    public function getExtractionDate()
+    public function getExtractionDate(): ?\DateTime
     {
         return $this->extractionDate;
     }
 
     /**
-     * @param mixed $extractionDate
+     * @param \DateTime $extractionDate
      */
     public function setExtractionDate($extractionDate): void
     {
@@ -236,15 +236,15 @@ class Entry
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getElasticId()
+    public function getElasticId(): string
     {
         return $this->elasticId;
     }
 
     /**
-     * @param mixed $elasticId
+     * @param string $elasticId
      */
     public function setElasticId($elasticId): void
     {

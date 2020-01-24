@@ -70,12 +70,14 @@ class StatisticsExtractionService
 
         $numberOfDaysToSearch = (int) $today->diff($latestExtractionDate)->format('%a');
 
-        $numberOfEntriesAdded = 0;
+        $entriesAdded = 0;
 
         // Extract logs for all dates from latest extraction date to yesterday.
         // Create all as Entry documents in the database.
         while ($numberOfDaysToSearch > 0) {
             $dayToSearch = new \DateTime('-'.($numberOfDaysToSearch - 1).' days');
+
+            $entriesAddedFromDay = 0;
 
             // Get entries from elasticsearch index.
             $statistics = $this->elasticsearchService->getLogsFromElasticsearch($dayToSearch, 'Cover request/response');
@@ -85,12 +87,10 @@ class StatisticsExtractionService
             // Add all to mongodb.
             foreach ($statistics as $statisticsEntry) {
                 // Flush when batch size is exceeded to avoid memory buildup.
-                if (0 < $numberOfEntriesAdded && $numberOfEntriesAdded > $nextBatchLimit) {
+                if (0 < $entriesAdded && $entriesAdded > $nextBatchLimit) {
                     $nextBatchLimit = $nextBatchLimit + self::BATCH_SIZE;
                     $this->documentManager->flush();
                     $this->documentManager->clear();
-
-                    gc_collect_cycles();
                 }
 
                 $elasticId = $statisticsEntry->_id;
@@ -122,7 +122,8 @@ class StatisticsExtractionService
                             $matchEntry->match
                         );
                         $this->documentManager->persist($entry);
-                        ++$numberOfEntriesAdded;
+                        ++$entriesAdded;
+                        ++$entriesAddedFromDay;
                     }
                 } else {
                     // Version 1 of statistics logging, where matches is not set.
@@ -152,7 +153,8 @@ class StatisticsExtractionService
                             array_pop($fileNames)
                         );
                         $this->documentManager->persist($entry);
-                        ++$numberOfEntriesAdded;
+                        ++$entriesAdded;
+                        ++$entriesAddedFromDay;
 
                         continue;
                     }
@@ -170,7 +172,8 @@ class StatisticsExtractionService
                                 null
                             );
                             $this->documentManager->persist($entry);
-                            ++$numberOfEntriesAdded;
+                            ++$entriesAdded;
+                            ++$entriesAddedFromDay;
                         }
 
                         continue;
@@ -188,7 +191,8 @@ class StatisticsExtractionService
                             'undetermined'
                         );
                         $this->documentManager->persist($entry);
-                        ++$numberOfEntriesAdded;
+                        ++$entriesAdded;
+                        ++$entriesAddedFromDay;
                     }
                 }
             }
@@ -196,7 +200,7 @@ class StatisticsExtractionService
             // Save new extraction result.
             $extractionResult = new ExtractionResult();
             $extractionResult->setDate($dayToSearch);
-            $extractionResult->setNumberOfEntriesAdded($numberOfEntriesAdded);
+            $extractionResult->setNumberOfEntriesAdded($entriesAddedFromDay);
             $this->documentManager->persist($extractionResult);
 
             // Flush to database.
@@ -218,6 +222,8 @@ class StatisticsExtractionService
     {
         $entries = $this->entryRepository->findBy(['extracted' => true]);
 
+        $entriesRemoved = 0;
+
         /* @var Entry $entry */
         foreach ($entries as $entry) {
             if (null !== $entry->getExtracted() && null !== $entry->getExtractionDate()) {
@@ -225,6 +231,13 @@ class StatisticsExtractionService
 
                 if (0 < $diff && $entry->getExtractionDate() < $compareDate) {
                     $this->documentManager->remove($entry);
+
+                    $entriesRemoved++;
+
+                    // Flush when batch size is exceeded to avoid memory buildup.
+                    if ($entriesRemoved % self::BATCH_SIZE === 0) {
+                        $this->documentManager->flush();
+                    }
                 }
             }
         }

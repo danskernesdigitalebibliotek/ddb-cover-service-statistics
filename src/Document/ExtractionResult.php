@@ -25,23 +25,23 @@ class ExtractionResult
     protected $numberOfEntriesAdded;
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
     /**
-     * @return mixed
+     * @return \DateTime
      */
-    public function getDate()
+    public function getDate(): \DateTime
     {
         return $this->date;
     }
 
     /**
-     * @param mixed $date
+     * @param \DateTime $date
      */
     public function setDate($date): void
     {
@@ -49,15 +49,15 @@ class ExtractionResult
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getNumberOfEntriesAdded()
+    public function getNumberOfEntriesAdded(): int
     {
         return $this->numberOfEntriesAdded;
     }
 
     /**
-     * @param mixed $numberOfEntriesAdded
+     * @param int $numberOfEntriesAdded
      */
     public function setNumberOfEntriesAdded($numberOfEntriesAdded): void
     {

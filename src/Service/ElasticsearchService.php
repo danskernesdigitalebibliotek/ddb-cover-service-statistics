@@ -24,10 +24,10 @@ class ElasticsearchService implements ElasticsearchServiceInterface
      *
      * @param \Symfony\Contracts\HttpClient\HttpClientInterface $httpClient
      *   The http client
-     * @param $boundElasticsearchURL
+     * @param string $boundElasticsearchURL
      *   Url of elasticsearch instance
      */
-    public function __construct(HttpClientInterface $httpClient, $boundElasticsearchURL)
+    public function __construct(HttpClientInterface $httpClient, string $boundElasticsearchURL)
     {
         $this->elasticsearchURL = $boundElasticsearchURL;
         $this->httpClient = $httpClient;
