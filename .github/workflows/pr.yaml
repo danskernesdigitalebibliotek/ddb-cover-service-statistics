@@ -17,7 +17,6 @@ jobs:
                     composer validate composer.json
             -   name: Composer install with exported .env variables
                 run: |
-#                    set -a && source .env && set +a
                     APP_ENV=prod composer install --no-dev -o
 
     runner-phpcs:
