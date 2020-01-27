@@ -1,0 +1,29 @@
+api_platform:
+    mapping:
+        paths: ['%kernel.project_dir%/src/Document']
+    patch_formats:
+        json: ['application/merge-patch+json']
+    swagger:
+        versions: [3]
+    title: 'DDB Cover Service Faktor Export'
+    version: '1.0.0'
+    description: >-
+        <p>The service is provided by <a href="https://www.danskernesdigitalebibliotek.dk/">Danskernes Digitale Bibliotek</a></p>
+        <h4>Implementation notes</h4>
+        Currently the API is not fully implemented. The following features are missing:
+        <ul>
+        <li>Oauth: not implemented.</li>
+        </ul>
+        <p><a href="https://www.gnu.org/licenses/agpl-3.0.en.html">GNU Affero General Public License</a></p>
+    show_webby: false
+    enable_re_doc: false
+    formats:
+        json:
+            mime_types: ['application/json']
+        html:
+            mime_types: ['text/html']
+    collection:
+        pagination:
+            items_per_page: 100
+    doctrine:
+        enabled: false
