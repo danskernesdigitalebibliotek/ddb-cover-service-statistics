@@ -19,7 +19,7 @@ kubectl apply -f app-deployment.yaml -f app-ingress.yaml -f app-secret.yaml
 ```
 
 # Secret template
-Template to set secrets used be the application.
+Template to set secrets used by the application.
 
 ```yaml
 ---
