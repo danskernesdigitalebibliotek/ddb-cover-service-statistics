@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Class FakeElasticsearchContentCommand.
@@ -20,20 +21,24 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class FakeCommand extends Command
 {
     private $fakerService;
+    private $environment;
 
     protected static $defaultName = 'app:fake-content';
 
     /**
      * ExtractStatisticsCommand constructor.
      *
+     * @param \Symfony\Component\HttpKernel\KernelInterface $kernel
+     *   The kernel
      * @param \App\Test\DataFakerService $fakerService
      *   The faker service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()
      */
-    public function __construct(DataFakerService $fakerService, string $name = null)
+    public function __construct(KernelInterface $kernel, DataFakerService $fakerService, string $name = null)
     {
         $this->fakerService = $fakerService;
+        $this->environment = $kernel->getEnvironment();
 
         parent::__construct($name);
     }
@@ -53,6 +58,12 @@ class FakeCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        if ('prod' === $this->environment) {
+            $io->error('This fake content command cannot run in prod environment.');
+
+            return 1;
+        }
 
         $dateString = $input->getArgument('date');
 
