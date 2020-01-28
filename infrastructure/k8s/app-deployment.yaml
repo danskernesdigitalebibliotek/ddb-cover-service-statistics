@@ -9,6 +9,8 @@ data:
   APP_REDIS_CACHE_PORT: '6379'
   APP_REDIS_CACHE_DB: '10'
   APP_ELASTIC_URL: 'http://elasticsearch-es-http:9200/'
+  APP_MONGODB_SERVER: 'faktor-mongo-mongodb.cover-service.svc.cluster.local'
+  APP_MONGODB_PORT: '27017'
   PHP_PM_MAX_CHILDREN: '20'
   PHP_PM_START_SERVERS: '2'
   PHP_PM_MIN_SPARE_SERVERS: '2'
@@ -97,11 +99,21 @@ spec:
           - name: APP_SECRET
             valueFrom:
               secretKeyRef:
-                name: cover-service-secret
+                name: cover-service-faktor-export-secret
                 key: APP_SECRET
+          - name: APP_MONGODB_USER
+            valueFrom:
+              secretKeyRef:
+                name: cover-service-faktor-export-secret
+                key: APP_MONGODB_USER
+          - name: APP_MONGODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cover-service-faktor-export-secret
+                key: APP_MONGODB_PASSWORD
         envFrom:
           - configMapRef:
-              name: cover-service-config
+              name: cover-service-faktor-export-config
         ports:
           - containerPort: 9000
           - containerPort: 9253
@@ -127,7 +139,7 @@ spec:
           periodSeconds: 10
         envFrom:
           - configMapRef:
-              name: nginx-config
+              name: nginx-faktor-export-config
         ports:
           - containerPort: 80
       - name: nginx-exporter
