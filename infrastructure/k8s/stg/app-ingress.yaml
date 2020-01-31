@@ -1,0 +1,24 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: cover-service
+  name: cover-service-faktor-export-frontend
+  annotations:
+    kubernetes.io/ingress.class: nginx
+#    cert-manager.io/cluster-issuer: letsencrypt
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10254"
+spec:
+#  tls:
+#    - hosts:
+#        - faktor.coverservice.itkdev.dk
+#      secretName: cover-service-faktor-export-frontend-tls-secret
+  rules:
+    - host: faktor.coverservice.itkdev.dk
+      http:
+        paths:
+          - backend:
+              serviceName: cover-service-faktor-export
+              servicePort: 80
+            path: /
