@@ -14,7 +14,7 @@ RUN tar -zxf /tmp/app.tar --strip-components=1 -C ${APP_PATH} \
 COPY --from=composer:1.9.1 /usr/bin/composer /usr/bin/composer
 
 # Install mongodb php extension
-RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make \
+RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make openssl-dev \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
     && pecl clear-cache \
@@ -45,6 +45,13 @@ RUN chown -R www-data:www-data ${APP_PATH}/var \
     && mkdir -p ${APP_PATH}/config/secrets \
     && chown -R www-data:www-data ${APP_PATH}/config/secrets \
     && rm -rf ${APP_PATH}/infrastructure
+
+# Install mongodb php extension
+RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make openssl-dev \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
+    && pecl clear-cache \
+    && apk del .build-deps
 
 # Download prometheus php-fpm export.
 COPY --from=hipages/php-fpm_exporter /php-fpm_exporter /usr/local/bin/php-fpm_exporter

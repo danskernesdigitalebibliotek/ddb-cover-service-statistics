@@ -11,6 +11,7 @@ data:
   APP_ELASTIC_URL: 'http://elasticsearch-es-http:9200/'
   APP_MONGODB_SERVER: 'faktor-mongo-mongodb.cover-service.svc.cluster.local'
   APP_MONGODB_PORT: '27017'
+  APP_MONGODB_DB: 'faktor'
   PHP_PM_MAX_CHILDREN: '20'
   PHP_PM_START_SERVERS: '2'
   PHP_PM_MIN_SPARE_SERVERS: '2'
