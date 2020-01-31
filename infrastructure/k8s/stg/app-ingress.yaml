@@ -6,14 +6,17 @@ metadata:
   name: cover-service-faktor-export-frontend
   annotations:
     kubernetes.io/ingress.class: nginx
-#    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+    cert-manager.io/cluster-issuer: letsencrypt
     prometheus.io/scrape: "true"
     prometheus.io/port: "10254"
 spec:
-#  tls:
-#    - hosts:
-#        - faktor.coverservice.itkdev.dk
-#      secretName: cover-service-faktor-export-frontend-tls-secret
+  tls:
+    - hosts:
+        - faktor.coverservice.itkdev.dk
+      secretName: cover-service-faktor-export-frontend-tls-secret
   rules:
     - host: faktor.coverservice.itkdev.dk
       http:
