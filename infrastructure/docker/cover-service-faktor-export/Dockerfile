@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/danskernesdigitalebibliotek/ddb-base-images-k8s/php7.3-fpm-base AS APP_BUILDER
+FROM docker.pkg.github.com/danskernesdigitalebibliotek/ddb-base-images-k8s/php7.3-fpm-base
 LABEL maintainer="ITK Dev <itkdev@mkb.aarhus.dk>"
 
 ARG APP_VERSION="develop"
@@ -13,11 +13,16 @@ RUN tar -zxf /tmp/app.tar --strip-components=1 -C ${APP_PATH} \
 # Add composer in from the official composer image (also alpine).
 COPY --from=composer:1.9.1 /usr/bin/composer /usr/bin/composer
 
-# Install mongodb php extension
-RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make openssl-dev \
-    && pecl install mongodb \
+# Install mongodb php extension (hack https://github.com/mongodb/mongo-php-driver/issues/1097)
+RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make openssl-dev git \
+    && git clone https://github.com/mongodb/mongo-php-driver.git /tmp/mongo-php-driver \
+    && cd /tmp/mongo-php-driver \
+    && git submodule update --init \
+    && phpize \
+    && ./configure --with-mongodb-client-side-encryption=no \
+    && make all \
+    && make install \
     && docker-php-ext-enable mongodb \
-    && pecl clear-cache \
     && apk del .build-deps
 
 WORKDIR ${APP_PATH}
@@ -30,28 +35,12 @@ RUN APP_ENV=prod composer install --no-dev -o --no-scripts --classmap-authoritat
     && cp -f /tmp/cache.yaml config/packages/cache.yaml \
     && composer clear-cache
 
-####
-## Build main application image.
-####
-FROM docker.pkg.github.com/danskernesdigitalebibliotek/ddb-base-images-k8s/php7.3-fpm-base
-LABEL maintainer="ITK Dev <itkdev@mkb.aarhus.dk>"
-
-ENV APP_PATH=/var/www/html \
-    FILEPATH=infrastructure/docker/cover-service-faktor-export
 
 # Install the application.
-COPY --from=APP_BUILDER ${APP_PATH} ${APP_PATH}
 RUN chown -R www-data:www-data ${APP_PATH}/var \
     && mkdir -p ${APP_PATH}/config/secrets \
     && chown -R www-data:www-data ${APP_PATH}/config/secrets \
     && rm -rf ${APP_PATH}/infrastructure
-
-# Install mongodb php extension
-RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make openssl-dev \
-    && pecl install mongodb \
-    && docker-php-ext-enable mongodb \
-    && pecl clear-cache \
-    && apk del .build-deps
 
 # Download prometheus php-fpm export.
 COPY --from=hipages/php-fpm_exporter /php-fpm_exporter /usr/local/bin/php-fpm_exporter
