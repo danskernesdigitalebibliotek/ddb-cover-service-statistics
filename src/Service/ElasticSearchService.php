@@ -245,6 +245,8 @@ class ElasticSearchService implements SearchServiceInterface
      * @param string $scrollId
      *   The scroll id from elasticsearch. If not given the cache value will be returned
      *
+     * @suppress PhanTypeInvalidThrowsIsInterface
+     *
      * @throws InvalidArgumentException
      */
     private function setScrollId(string $scrollId)

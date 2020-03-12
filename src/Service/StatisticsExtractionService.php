@@ -85,7 +85,7 @@ class StatisticsExtractionService
             $entriesAddedFromDay = 0;
             $nextBatchLimit = self::BATCH_SIZE;
 
-            $this->progressMessage('Search stats for date '. $dayToSearch->format('d-m-Y'));
+            $this->progressMessage('Search stats for date '.$dayToSearch->format('d-m-Y'));
 
             do {
                 // Get statistics batch (tracking of current batch is handled inside the search provider). An empty

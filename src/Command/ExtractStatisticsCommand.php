@@ -48,6 +48,8 @@ class ExtractStatisticsCommand extends Command
 
     /**
      * {@inheritdoc}
+     *
+     * @suppress PhanUndeclaredMethod
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
