@@ -1,0 +1,8 @@
+apiVersion: v2
+name: cover-service-faktor
+description: DDB Cover service faktor exporter API
+
+type: application
+
+version: 0.1.0
+

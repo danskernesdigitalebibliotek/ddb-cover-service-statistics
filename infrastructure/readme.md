@@ -15,22 +15,6 @@ helm install faktor-mongo stable/mongodb --set mongodbUsername=faktor,mongodbPas
 
 Deploy the application.
 ```bash
-kubectl apply -f app-deployment.yaml -f app-ingress.yaml -f app-secret.yaml
+helm install cover-service-faktor infrastructure/cover-service-faktor/ --set ingress.enableTLS=true --set ingress.domain=faktor-cover.dandigbib.org 
 ```
 
-# Secret template
-Template to set secrets used by the application.
-
-```yaml
----
-apiVersion: v1
-kind: Secret
-metadata:
-  namespace: cover-service
-  name: cover-service-faktor-export-secret
-type: Opaque
-stringData:
-  APP_SECRET: 'x'
-  APP_MONGODB_USER: 'faktor'
-  APP_MONGODB_PASSWORD: 'y'
-```
