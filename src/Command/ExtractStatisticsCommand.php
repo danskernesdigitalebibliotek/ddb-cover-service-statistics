@@ -25,7 +25,7 @@ class ExtractStatisticsCommand extends Command
     /**
      * ExtractStatisticsCommand constructor.
      *
-     * @param \App\Service\StatisticsExtractionService $extractionService
+     * @param StatisticsExtractionService $extractionService
      *   The extraction service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()

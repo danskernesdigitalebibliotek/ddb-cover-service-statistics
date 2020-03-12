@@ -7,6 +7,10 @@
 
 namespace App\Service;
 
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -22,7 +26,7 @@ class ElasticsearchService implements ElasticsearchServiceInterface
     /**
      * StatisticsExtractionService constructor.
      *
-     * @param \Symfony\Contracts\HttpClient\HttpClientInterface $httpClient
+     * @param HttpClientInterface $httpClient
      *   The http client
      * @param string $boundElasticsearchURL
      *   Url of elasticsearch instance
@@ -47,10 +51,10 @@ class ElasticsearchService implements ElasticsearchServiceInterface
      * Suppress phan false positive:
      * @phan-file-suppress PhanTypeInvalidThrowsIsInterface
      *
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getLogsFromElasticsearch(\DateTime $date, string $message): array
     {

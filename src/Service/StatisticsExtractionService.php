@@ -12,6 +12,7 @@ use App\Document\ExtractionResult;
 use App\Repository\EntryRepository;
 use App\Repository\ExtractionResultRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -30,15 +31,15 @@ class StatisticsExtractionService
     /**
      * StatisticsExtractionService constructor.
      *
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     * @param DocumentManager $documentManager
      *   The document manager
-     * @param \App\Repository\EntryRepository $entryRepository
+     * @param EntryRepository $entryRepository
      *   Repository for Entry documents
-     * @param \App\Repository\ExtractionResultRepository $extractionResultRepository
+     * @param ExtractionResultRepository $extractionResultRepository
      *   Repository for ExtractResult documents
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      *   The logger
-     * @param \App\Service\ElasticsearchServiceInterface $elasticsearchService
+     * @param ElasticsearchServiceInterface $elasticsearchService
      *   Service to integrate with elasticsearch
      */
     public function __construct(DocumentManager $documentManager, EntryRepository $entryRepository, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, ElasticsearchServiceInterface $elasticsearchService)
@@ -53,7 +54,7 @@ class StatisticsExtractionService
     /**
      * Extract new statistics.
      *
-     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     * @throws MongoDBException
      */
     public function extractStatistics()
     {
@@ -216,7 +217,7 @@ class StatisticsExtractionService
      * @param \DateTime $compareDate
      *   Date to compare with. Entries extracted before $compareDate are removed
      *
-     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     * @throws MongoDBException
      */
     public function removeExtractedEntries(\DateTime $compareDate)
     {
@@ -263,7 +264,7 @@ class StatisticsExtractionService
      * @param string|null $imageId
      *   The image id
      *
-     * @return \App\Document\Entry
+     * @return Entry
      */
     private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, string $materialId, string $response, ?string $imageId): Entry
     {

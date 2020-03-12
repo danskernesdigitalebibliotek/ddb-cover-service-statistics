@@ -16,6 +16,8 @@ services:
       MONGO_INITDB_DATABASE: db
       MONGO_INITDB_ROOT_USERNAME: db
       MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - '27017'
 
   phpfpm:
     image: itkdev/php7.3-fpm
