@@ -17,8 +17,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Class ElasticSearchService.
- *
- * @package App\Service
  */
 class ElasticSearchService implements SearchServiceInterface
 {

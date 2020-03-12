@@ -20,6 +20,8 @@ use Psr\Log\LoggerInterface;
  */
 class StatisticsExtractionService
 {
+    use ProgressBarTrait;
+
     protected const BATCH_SIZE = 50;
 
     private $documentManager;
@@ -60,6 +62,8 @@ class StatisticsExtractionService
     {
         $today = new \DateTime();
 
+        $this->progressStart('Starting extraction process');
+
         // Get latest extraction entry. Default to first day of production.
         /* @var ExtractionResult $lastExtraction */
         $lastExtraction = $this->extractionResultRepository->getNewestEntry();
@@ -80,6 +84,8 @@ class StatisticsExtractionService
 
             $entriesAddedFromDay = 0;
             $nextBatchLimit = self::BATCH_SIZE;
+
+            $this->progressMessage('Search stats for date '. $dayToSearch->format('d-m-Y'));
 
             do {
                 // Get statistics batch (tracking of current batch is handled inside the search provider). An empty
@@ -196,7 +202,9 @@ class StatisticsExtractionService
                             ++$entriesAddedFromDay;
                         }
                     }
+                    $this->progressAdvance();
                 }
+                $this->progressAdvance();
             } while (!empty($statistics));
 
             // Reset/remove the internal batch state for the current date.
@@ -213,6 +221,8 @@ class StatisticsExtractionService
 
             --$numberOfDaysToSearch;
         }
+
+        $this->progressFinish();
     }
 
     /**
