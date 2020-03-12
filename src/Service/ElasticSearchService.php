@@ -7,10 +7,8 @@
 
 namespace App\Service;
 
-use mysql_xdevapi\Exception;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -53,6 +51,8 @@ class ElasticSearchService implements SearchServiceInterface
     /**
      * {@inheritdoc}
      *
+     * @suppress PhanTypeInvalidThrowsIsInterface
+     *
      * @throws ClientExceptionInterface
      * @throws InvalidArgumentException
      * @throws RedirectionExceptionInterface
@@ -90,21 +90,24 @@ class ElasticSearchService implements SearchServiceInterface
      *
      * For this search provider and reset requires us to delete the scroll API id and clear local cache.
      *
+     * @suppress PhanTypeInvalidThrowsIsInterface
+     *
      * @throws InvalidArgumentException
      * @throws TransportExceptionInterface
      */
-    public function reset() {
+    public function reset()
+    {
         $scrollId = $this->getScrollId();
         if (!is_null($scrollId)) {
             $query = json_encode((object) [
                 'scroll_id' => $scrollId,
             ]);
             try {
-                $this->httpClient->request('DELETE', $this->elasticSearchURL . '_search/scroll', [
+                $this->httpClient->request('DELETE', $this->elasticSearchURL.'_search/scroll', [
                     'body' => $query,
                     'headers' => [
                         'Content-Type: application/json',
-                        'Content-Length: ' . strlen($query),
+                        'Content-Length: '.strlen($query),
                     ],
                 ]);
             } catch (\Exception $e) {
@@ -124,6 +127,8 @@ class ElasticSearchService implements SearchServiceInterface
      * @return bool
      *  True if it exists else false
      *
+     * @suppress PhanTypeInvalidThrowsIsInterface
+     *
      * @throws TransportExceptionInterface
      */
     private function indexExists(string $index)
@@ -142,9 +147,12 @@ class ElasticSearchService implements SearchServiceInterface
      * This changes base on the first request to the scroll API and the next calls.
      *
      * @param string $index
-     *   The name of the index.
+     *   The name of the index
+     *
      * @return string
-     *   The path required for the context given.
+     *   The path required for the context given
+     *
+     * @suppress PhanTypeInvalidThrowsIsInterface
      *
      * @throws InvalidArgumentException
      */
@@ -160,11 +168,32 @@ class ElasticSearchService implements SearchServiceInterface
         return $path;
     }
 
-    private function getScrollTTL() {
+    /**
+     * Get scroll API time-to-live.
+     *
+     * @return string
+     *   The time to live formatted for ES
+     */
+    private function getScrollTTL()
+    {
         return (self::SCROLL_ID_TTL).'s';
     }
 
-    private function buildRequestBody(string $message) {
+    /**
+     * Build request body based on current state.
+     *
+     * @param string $message
+     *   The message to search for in ES
+     *
+     * @return false|string
+     *   JSON encoded string to use with ES
+     *
+     * @suppress PhanTypeInvalidThrowsIsInterface
+     *
+     * @throws InvalidArgumentException
+     */
+    private function buildRequestBody(string $message)
+    {
         $scrollId = $this->getScrollId();
         if (!is_null($scrollId)) {
             $query = [
@@ -197,11 +226,13 @@ class ElasticSearchService implements SearchServiceInterface
      * @return string|null
      *   If found in cache it's returned else null
      *
+     * @suppress PhanTypeInvalidThrowsIsInterface
+     *
      * @throws InvalidArgumentException
      */
     private function getScrollId(string $scrollId = null): ?string
     {
-        $item =  $this->cache->getItem(self::CACHE_ID);
+        $item = $this->cache->getItem(self::CACHE_ID);
         if ($item->isHit() && is_null($scrollId)) {
             $scrollId = $item->get();
         } else {
