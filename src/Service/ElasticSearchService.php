@@ -17,6 +17,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Class ElasticSearchService.
+ *
+ * @package App\Service
  */
 class ElasticSearchService implements SearchServiceInterface
 {
@@ -80,7 +82,7 @@ class ElasticSearchService implements SearchServiceInterface
         $results = json_decode($response->getContent());
 
         // Save the current scroll id (it might change from request to request).
-        $this->getScrollId($results->_scroll_id);
+        $this->setScrollId($results->_scroll_id);
 
         return $results->hits->hits;
     }
@@ -98,7 +100,7 @@ class ElasticSearchService implements SearchServiceInterface
     public function reset()
     {
         $scrollId = $this->getScrollId();
-        if (!is_null($scrollId)) {
+        if (false !== $scrollId) {
             $query = json_encode((object) [
                 'scroll_id' => $scrollId,
             ]);
@@ -158,10 +160,10 @@ class ElasticSearchService implements SearchServiceInterface
      */
     private function buildSearchPath(string $index)
     {
-        $scrollId = $this->getScrollId();
-
         $path = '_search/scroll';
-        if (is_null($scrollId)) {
+
+        $scrollId = $this->getScrollId();
+        if (false === $scrollId) {
             $path = $index.'/_search?scroll='.$this->getScrollTTL();
         }
 
@@ -195,12 +197,7 @@ class ElasticSearchService implements SearchServiceInterface
     private function buildRequestBody(string $message)
     {
         $scrollId = $this->getScrollId();
-        if (!is_null($scrollId)) {
-            $query = [
-                'scroll' => $this->getScrollTTL(),
-                'scroll_id' => $scrollId,
-            ];
-        } else {
+        if (false === $scrollId) {
             $query = [
                 'size' => self::SEARCH_SIZE,
                 'query' => (object) [
@@ -212,6 +209,11 @@ class ElasticSearchService implements SearchServiceInterface
                     '_doc',
                 ],
             ];
+        } else {
+            $query = [
+                'scroll' => $this->getScrollTTL(),
+                'scroll_id' => $scrollId,
+            ];
         }
 
         return json_encode((object) $query);
@@ -220,27 +222,38 @@ class ElasticSearchService implements SearchServiceInterface
     /**
      * Get/set scroll id.
      *
-     * @param string|null $scrollId
-     *   The scroll id from elasticsearch. If not given the cache value will be returned
-     *
-     * @return string|null
-     *   If found in cache it's returned else null
+     * @return string|bool
+     *   If found in cache it's returned else false
      *
      * @suppress PhanTypeInvalidThrowsIsInterface
      *
      * @throws InvalidArgumentException
      */
-    private function getScrollId(string $scrollId = null): ?string
+    private function getScrollId()
     {
         $item = $this->cache->getItem(self::CACHE_ID);
-        if ($item->isHit() && is_null($scrollId)) {
+        if ($item->isHit()) {
             $scrollId = $item->get();
         } else {
-            $item->set($scrollId);
-            $item->expiresAfter(self::SCROLL_ID_TTL);
-            $this->cache->save($item);
+            $scrollId = false;
         }
 
         return $scrollId;
+    }
+
+    /**
+     * Set/store scroll id into cache.
+     *
+     * @param string $scrollId
+     *   The scroll id from elasticsearch. If not given the cache value will be returned
+     *
+     * @throws InvalidArgumentException
+     */
+    private function setScrollId(string $scrollId)
+    {
+        $item = $this->cache->getItem(self::CACHE_ID);
+        $item->set($scrollId);
+        $item->expiresAfter(self::SCROLL_ID_TTL);
+        $this->cache->save($item);
     }
 }
