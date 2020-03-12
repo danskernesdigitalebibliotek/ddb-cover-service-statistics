@@ -23,12 +23,12 @@ class DataFakerService
      *
      * @param HttpClientInterface $httpClient
      *   The http client
-     * @param $boundElasticsearchURL
-     *   Url of Elasticsearch instance
+     * @param $boundElasticSearchURL
+     *   Url of ElasticSearch instance
      */
-    public function __construct(HttpClientInterface $httpClient, $boundElasticsearchURL)
+    public function __construct(HttpClientInterface $httpClient, $boundElasticSearchURL)
     {
-        $this->elasticsearchURL = $boundElasticsearchURL;
+        $this->elasticsearchURL = $boundElasticSearchURL;
         $this->httpClient = $httpClient;
     }
 
