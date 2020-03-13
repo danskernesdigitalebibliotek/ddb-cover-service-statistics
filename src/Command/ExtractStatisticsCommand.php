@@ -9,6 +9,7 @@ namespace App\Command;
 
 use App\Service\StatisticsExtractionService;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -25,7 +26,7 @@ class ExtractStatisticsCommand extends Command
     /**
      * ExtractStatisticsCommand constructor.
      *
-     * @param \App\Service\StatisticsExtractionService $extractionService
+     * @param StatisticsExtractionService $extractionService
      *   The extraction service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()
@@ -47,10 +48,17 @@ class ExtractStatisticsCommand extends Command
 
     /**
      * {@inheritdoc}
+     *
+     * @suppress PhanUndeclaredMethod
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        $section = $output->section('Sheet');
+        $progressBarSheet = new ProgressBar($section);
+        $progressBarSheet->setFormat('[%bar%] %elapsed% (%memory%) - %message%');
+        $this->extractionService->setProgressBar($progressBarSheet);
 
         $this->extractionService->extractStatistics();
 

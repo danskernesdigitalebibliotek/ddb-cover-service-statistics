@@ -26,7 +26,7 @@ class ResponseSubscriber implements EventSubscriberInterface
     /**
      * ResponseSubscriber constructor.
      *
-     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
+     * @param EventDispatcherInterface $dispatcher
      *   The event dispatcher
      * @param DocumentManager $documentManager
      *   Entry repository
@@ -40,7 +40,7 @@ class ResponseSubscriber implements EventSubscriberInterface
     /**
      * Mark all entries that have been delivered from the database as extracted.
      *
-     * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
+     * @param ResponseEvent $event
      *
      * @throws \Exception
      */

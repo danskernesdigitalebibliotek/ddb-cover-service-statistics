@@ -7,6 +7,7 @@
 
 namespace App\Test;
 
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -20,14 +21,14 @@ class DataFakerService
     /**
      * ElasticsearchFaker constructor.
      *
-     * @param \Symfony\Contracts\HttpClient\HttpClientInterface $httpClient
+     * @param HttpClientInterface $httpClient
      *   The http client
-     * @param $boundElasticsearchURL
-     *   Url of Elasticsearch instance
+     * @param $boundElasticSearchURL
+     *   Url of ElasticSearch instance
      */
-    public function __construct(HttpClientInterface $httpClient, $boundElasticsearchURL)
+    public function __construct(HttpClientInterface $httpClient, $boundElasticSearchURL)
     {
-        $this->elasticsearchURL = $boundElasticsearchURL;
+        $this->elasticsearchURL = $boundElasticSearchURL;
         $this->httpClient = $httpClient;
     }
 
@@ -42,7 +43,7 @@ class DataFakerService
      * Suppress phan false positive:
      * @phan-file-suppress PhanTypeInvalidThrowsIsInterface
      *
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function createElasticsearchTestData(\DateTime $date = null): bool
     {

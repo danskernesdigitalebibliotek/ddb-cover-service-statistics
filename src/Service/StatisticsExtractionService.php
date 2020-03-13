@@ -12,6 +12,7 @@ use App\Document\ExtractionResult;
 use App\Repository\EntryRepository;
 use App\Repository\ExtractionResultRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,6 +20,8 @@ use Psr\Log\LoggerInterface;
  */
 class StatisticsExtractionService
 {
+    use ProgressBarTrait;
+
     protected const BATCH_SIZE = 50;
 
     private $documentManager;
@@ -30,18 +33,18 @@ class StatisticsExtractionService
     /**
      * StatisticsExtractionService constructor.
      *
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     * @param DocumentManager $documentManager
      *   The document manager
-     * @param \App\Repository\EntryRepository $entryRepository
+     * @param EntryRepository $entryRepository
      *   Repository for Entry documents
-     * @param \App\Repository\ExtractionResultRepository $extractionResultRepository
+     * @param ExtractionResultRepository $extractionResultRepository
      *   Repository for ExtractResult documents
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      *   The logger
-     * @param \App\Service\ElasticsearchServiceInterface $elasticsearchService
+     * @param SearchServiceInterface $elasticsearchService
      *   Service to integrate with elasticsearch
      */
-    public function __construct(DocumentManager $documentManager, EntryRepository $entryRepository, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, ElasticsearchServiceInterface $elasticsearchService)
+    public function __construct(DocumentManager $documentManager, EntryRepository $entryRepository, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, SearchServiceInterface $elasticsearchService)
     {
         $this->documentManager = $documentManager;
         $this->logger = $logger;
@@ -53,11 +56,13 @@ class StatisticsExtractionService
     /**
      * Extract new statistics.
      *
-     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     * @throws MongoDBException
      */
     public function extractStatistics()
     {
         $today = new \DateTime();
+
+        $this->progressStart('Starting extraction process');
 
         // Get latest extraction entry. Default to first day of production.
         /* @var ExtractionResult $lastExtraction */
@@ -78,89 +83,110 @@ class StatisticsExtractionService
             $dayToSearch = new \DateTime('-'.($numberOfDaysToSearch - 1).' days');
 
             $entriesAddedFromDay = 0;
-
-            // Get entries from elasticsearch index.
-            $statistics = $this->elasticsearchService->getLogsFromElasticsearch($dayToSearch, 'Cover request/response');
-
             $nextBatchLimit = self::BATCH_SIZE;
 
-            // Add all to mongodb.
-            foreach ($statistics as $statisticsEntry) {
-                // Flush when batch size is exceeded to avoid memory buildup.
-                if ($entriesAdded > $nextBatchLimit) {
-                    $nextBatchLimit = $nextBatchLimit + self::BATCH_SIZE;
-                    $this->documentManager->flush();
-                    $this->documentManager->clear();
-                }
+            $this->progressMessage('Search stats for date '.$dayToSearch->format('d-m-Y'));
 
-                $elasticId = $statisticsEntry->_id;
-                $agency = $statisticsEntry->_source->context->clientID;
+            do {
+                // Get statistics batch (tracking of current batch is handled inside the search provider). An empty
+                // array will be returned when no more hits are found or if there are no results for the given date.
+                $statistics = $this->elasticsearchService->getLogsFromSearch($dayToSearch, 'Cover request/response');
 
-                // If entry has already been imported, continue.
-                if ($this->entryRepository->entryExists($elasticId)) {
-                    continue;
-                }
-
-                if (isset($statisticsEntry->_source->context->matches)) {
-                    // Version 2 of statistics logging, where matches is set.
-                    foreach ($statisticsEntry->_source->context->matches as $matchEntry) {
-                        $response = [];
-
-                        if (null === $matchEntry->match) {
-                            $response['message'] = 'image not found';
-                        } else {
-                            $response['message'] = 'ok';
-                        }
-
-                        $entry = $this->createEntry(
-                            new \DateTime($statisticsEntry->_source->datetime),
-                            $elasticId,
-                            $agency,
-                            'request_image',
-                            $matchEntry->identifier,
-                            json_encode($response),
-                            $matchEntry->match
-                        );
-                        $this->documentManager->persist($entry);
-                        ++$entriesAdded;
-                        ++$entriesAddedFromDay;
-                    }
-                } else {
-                    // Version 1 of statistics logging, where matches is not set.
-                    $fileNames = $statisticsEntry->_source->context->fileNames ?? [];
-                    $searchIdentifiers = [];
-
-                    // Extract identifiers from search parameters for SOAP requests
-                    if (isset($statisticsEntry->_source->context->searchParameters)) {
-                        foreach ($statisticsEntry->_source->context->searchParameters as $identifiers) {
-                            $searchIdentifiers = array_merge($searchIdentifiers, $identifiers);
-                        }
-                    } elseif (isset($statisticsEntry->_source->context->isIdentifiers)) {
-                        // Extract identifiers from isIdentifiers for REST_API requests
-                        $searchIdentifiers = $statisticsEntry->_source->context->isIdentifiers;
+                foreach ($statistics as $statisticsEntry) {
+                    // Flush when batch size is exceeded to avoid memory buildup.
+                    if ($entriesAdded > $nextBatchLimit) {
+                        $nextBatchLimit = $nextBatchLimit + self::BATCH_SIZE;
+                        $this->documentManager->flush();
+                        $this->documentManager->clear();
                     }
 
-                    // If only searching for one identifier and only finding on file
-                    // create success entry.
-                    if (1 === count($searchIdentifiers) && 1 === count($fileNames)) {
-                        $entry = $this->createEntry(
-                            new \DateTime($statisticsEntry->_source->datetime),
-                            $elasticId,
-                            $agency,
-                            'request_image',
-                            array_pop($searchIdentifiers),
-                            json_encode(['message' => 'ok']),
-                            array_pop($fileNames)
-                        );
-                        $this->documentManager->persist($entry);
-                        ++$entriesAdded;
-                        ++$entriesAddedFromDay;
+                    $elasticId = $statisticsEntry->_id;
+                    $agency = $statisticsEntry->_source->context->clientID;
 
+                    // If entry has already been imported, continue.
+                    if ($this->entryRepository->entryExists($elasticId)) {
                         continue;
                     }
 
-                    // If fileNames is empty report failure for each identifier.
-                    if (0 === count($fileNames)) {
+                    if (isset($statisticsEntry->_source->context->matches)) {
+                        // Version 2 of statistics logging, where matches is set.
+                        foreach ($statisticsEntry->_source->context->matches as $matchEntry) {
+                            $response = [];
+
+                            if (null === $matchEntry->match) {
+                                $response['message'] = 'image not found';
+                            } else {
+                                $response['message'] = 'ok';
+                            }
+
+                            $entry = $this->createEntry(
+                                new \DateTime($statisticsEntry->_source->datetime),
+                                $elasticId,
+                                $agency,
+                                'request_image',
+                                $matchEntry->identifier,
+                                json_encode($response),
+                                $matchEntry->match
+                            );
+                            $this->documentManager->persist($entry);
+                            ++$entriesAdded;
+                            ++$entriesAddedFromDay;
+                        }
+                    } else {
+                        // Version 1 of statistics logging, where matches is not set.
+                        $fileNames = $statisticsEntry->_source->context->fileNames ?? [];
+                        $searchIdentifiers = [];
+
+                        // Extract identifiers from search parameters for SOAP requests
+                        if (isset($statisticsEntry->_source->context->searchParameters)) {
+                            foreach ($statisticsEntry->_source->context->searchParameters as $identifiers) {
+                                $searchIdentifiers = array_merge($searchIdentifiers, $identifiers);
+                            }
+                        } elseif (isset($statisticsEntry->_source->context->isIdentifiers)) {
+                            // Extract identifiers from isIdentifiers for REST_API requests
+                            $searchIdentifiers = $statisticsEntry->_source->context->isIdentifiers;
+                        }
+
+                        // If only searching for one identifier and only finding on file
+                        // create success entry.
+                        if (1 === count($searchIdentifiers) && 1 === count($fileNames)) {
+                            $entry = $this->createEntry(
+                                new \DateTime($statisticsEntry->_source->datetime),
+                                $elasticId,
+                                $agency,
+                                'request_image',
+                                array_pop($searchIdentifiers),
+                                json_encode(['message' => 'ok']),
+                                array_pop($fileNames)
+                            );
+                            $this->documentManager->persist($entry);
+                            ++$entriesAdded;
+                            ++$entriesAddedFromDay;
+
+                            continue;
+                        }
+
+                        // If fileNames is empty report failure for each identifier.
+                        if (0 === count($fileNames)) {
+                            foreach ($searchIdentifiers as $identifier) {
+                                $entry = $this->createEntry(
+                                    new \DateTime($statisticsEntry->_source->datetime),
+                                    $elasticId,
+                                    $agency,
+                                    'request_image',
+                                    $identifier,
+                                    json_encode(['message' => 'image not found']),
+                                    null
+                                );
+                                $this->documentManager->persist($entry);
+                                ++$entriesAdded;
+                                ++$entriesAddedFromDay;
+                            }
+
+                            continue;
+                        }
+
+                        // Otherwise, report results as undetermined.
                         foreach ($searchIdentifiers as $identifier) {
                             $entry = $this->createEntry(
                                 new \DateTime($statisticsEntry->_source->datetime),
@@ -168,34 +194,21 @@ class StatisticsExtractionService
                                 $agency,
                                 'request_image',
                                 $identifier,
-                                json_encode(['message' => 'image not found']),
-                                null
+                                json_encode(['message' => 'image maybe found']),
+                                'undetermined'
                             );
                             $this->documentManager->persist($entry);
                             ++$entriesAdded;
                             ++$entriesAddedFromDay;
                         }
-
-                        continue;
                     }
-
-                    // Otherwise, report results as undetermined.
-                    foreach ($searchIdentifiers as $identifier) {
-                        $entry = $this->createEntry(
-                            new \DateTime($statisticsEntry->_source->datetime),
-                            $elasticId,
-                            $agency,
-                            'request_image',
-                            $identifier,
-                            json_encode(['message' => 'image maybe found']),
-                            'undetermined'
-                        );
-                        $this->documentManager->persist($entry);
-                        ++$entriesAdded;
-                        ++$entriesAddedFromDay;
-                    }
+                    $this->progressAdvance();
                 }
-            }
+                $this->progressAdvance();
+            } while (!empty($statistics));
+
+            // Reset/remove the internal batch state for the current date.
+            $this->elasticsearchService->reset();
 
             // Save new extraction result.
             $extractionResult = new ExtractionResult();
@@ -208,6 +221,8 @@ class StatisticsExtractionService
 
             --$numberOfDaysToSearch;
         }
+
+        $this->progressFinish();
     }
 
     /**
@@ -216,7 +231,7 @@ class StatisticsExtractionService
      * @param \DateTime $compareDate
      *   Date to compare with. Entries extracted before $compareDate are removed
      *
-     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     * @throws MongoDBException
      */
     public function removeExtractedEntries(\DateTime $compareDate)
     {
@@ -263,7 +278,7 @@ class StatisticsExtractionService
      * @param string|null $imageId
      *   The image id
      *
-     * @return \App\Document\Entry
+     * @return Entry
      */
     private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, string $materialId, string $response, ?string $imageId): Entry
     {

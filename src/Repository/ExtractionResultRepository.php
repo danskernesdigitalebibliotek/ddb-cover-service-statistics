@@ -19,7 +19,7 @@ class ExtractionResultRepository extends DocumentRepository
     /**
      * ExtractionResultRepository constructor.
      *
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     * @param DocumentManager $documentManager
      *   The doctrine document manager
      */
     public function __construct(DocumentManager $documentManager)

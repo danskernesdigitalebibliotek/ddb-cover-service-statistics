@@ -28,9 +28,9 @@ class FakeCommand extends Command
     /**
      * ExtractStatisticsCommand constructor.
      *
-     * @param \Symfony\Component\HttpKernel\KernelInterface $kernel
+     * @param KernelInterface $kernel
      *   The kernel
-     * @param \App\Test\DataFakerService $fakerService
+     * @param DataFakerService $fakerService
      *   The faker service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()
@@ -66,7 +66,6 @@ class FakeCommand extends Command
         }
 
         $dateString = $input->getArgument('date');
-
         if (null === $dateString) {
             $io->warning('This will create fake content in elasticsearch. If you want to continue, enter a date below.');
 
@@ -74,7 +73,6 @@ class FakeCommand extends Command
         }
 
         $date = new \DateTime($dateString);
-
         $this->fakerService->createElasticsearchTestData($date);
 
         $io->success('Adding fake data to elasticsearch successfully.');

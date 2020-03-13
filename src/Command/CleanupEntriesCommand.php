@@ -26,8 +26,8 @@ class CleanupEntriesCommand extends Command
     /**
      * CleanupEntriesCommand constructor.
      *
-     * @param \App\Service\StatisticsExtractionService $fakerService
-     *   The statistics extration service
+     * @param StatisticsExtractionService $fakerService
+     *   The statistics extraction service
      */
     public function __construct(StatisticsExtractionService $fakerService)
     {
@@ -55,9 +55,7 @@ class CleanupEntriesCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $days = $input->getArgument('days');
-
         $compareDate = is_numeric($days) ? new \DateTime('-'.$days.' days') : new \DateTime();
-
         $this->extractionService->removeExtractedEntries($compareDate);
 
         $io->success('Extracted entries removed');

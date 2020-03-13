@@ -10,7 +10,7 @@ namespace App\Service;
 /**
  * Interface ElasticsearchServiceInterface.
  */
-interface ElasticsearchServiceInterface
+interface SearchServiceInterface
 {
     /**
      * Get the records from the given date from Elasticsearch.
@@ -22,6 +22,14 @@ interface ElasticsearchServiceInterface
      *
      * @return array
      *   Array of logs for the given date
+     *
+     * Suppress phan false positive:
+     * @phan-file-suppress PhanTypeInvalidThrowsIsInterface
      */
-    public function getLogsFromElasticsearch(\DateTime $date, string $message): array;
+    public function getLogsFromSearch(\DateTime $date, string $message): array;
+
+    /**
+     * Reset the internal batch handling.
+     */
+    public function reset();
 }
