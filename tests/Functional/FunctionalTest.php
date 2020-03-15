@@ -89,9 +89,14 @@ class FunctionalTest extends ApiTestCase
         $elasticSearchServiceMock = $this->createMock(SearchServiceInterface::class);
         $mockResponse = json_decode('[{"_index":"stats_18-01-2020","_type":"logs","_id":"jp_Vt28BPlVUX1bQ2KG1","_score":0.8630463,"_source":{"message":"Cover request\/response","context":{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","identifier":"9788740602456","type":"isbn"}],"elasticQueryTime":0.033380985260009766},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"jJ_Vt28BPlVUX1bQ2KF8","_score":0.5469647,"_source":{"message":"Cover request\/response","context":{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","identifier":"870970-basis:26957087","type":"pid"}]},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"j5_Vt28BPlVUX1bQ2KHW","_score":0.5469647,"_source":{"message":"Cover request\/response","context":{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"isbn":["900000000000000"]},"fileNames":null,"matches":[{"match":null,"identifier":"900000000000000","type":"isbn"}],"elasticQueryTime":0.025002002716064453},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"iZ_Vt28BPlVUX1bQ2KEY","_score":0.5469647,"_source":{"message":"Cover request\/response","context":{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg"],"elasticQueryTime":0.033380985260009766},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"i5_Vt28BPlVUX1bQ2KFE","_score":0.5469647,"_source":{"message":"Cover request\/response","context":{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087","870970-basis:53969127","870970-basis:00000001"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788702246841.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","identifier":"870970-basis:26957087","type":"pid"},{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788702246841.jpg","identifier":"870970-basis:53969127","type":"pid"},{"match":null,"identifier":"870970-basis:00000001","type":"pid"}]},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"iJ_Vt28BPlVUX1bQ16He","_score":0.5469647,"_source":{"message":"Cover request\/response","context":{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"pid":["870970-basis:29506914","870970-basis:29506906","882330-basis:17154889"],"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396728.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396650.jpg"],"elasticQueryTime":0.038236141204833984},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"jZ_Vt28BPlVUX1bQ2KGg","_score":0.5469647,"_source":{"message":"Cover request\/response","context":{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"pid":["870970-basis:29506914","870970-basis:29506906","882330-basis:17154889"],"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396728.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396650.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396728.jpg","identifier":"870970-basis:29506914","type":"pid"},{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788711396650.jpg","identifier":"870970-basis:29506906","type":"pid"},{"match":null,"identifier":"882330-basis:17154889","type":"pid"},{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","identifier":"9788740602456","type":"isbn"}],"elasticQueryTime":0.038236141204833984},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"hp_Vt28BPlVUX1bQ16F9","_score":0.40059417,"_source":{"message":"Cover request\/response","context":{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087","870970-basis:53969127","870970-basis:00000001"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg","http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788702246841.jpg"]},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"h5_Vt28BPlVUX1bQ16HQ","_score":0.40059417,"_source":{"message":"Cover request\/response","context":{"service":"CoverCollectionDataProvider","clientID":"REST_API","remoteIP":"127.0.0.1","isType":"pid","isIdentifiers":["870970-basis:26957087"],"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788763806176.jpg"]},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}},{"_index":"stats_18-01-2020","_type":"logs","_id":"ip_Vt28BPlVUX1bQ2KEm","_score":0.40059417,"_source":{"message":"Cover request\/response","context":{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"isbn":["900000000000000"]},"fileNames":null,"elasticQueryTime":0.025002002716064453},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}}]');
         $elasticSearchServiceMock
-            ->expects($this->once())
-            ->method('getLogsFromElasticsearch')
+            ->expects($this->at(0))
+            ->method('getLogsFromSearch')
             ->will($this->returnValue($mockResponse))
+        ;
+        $elasticSearchServiceMock
+            ->expects($this->at(1))
+            ->method('getLogsFromSearch')
+            ->will($this->returnValue([]))
         ;
 
         $extractionService = new StatisticsExtractionService($documentManager, $entryRepository, $extractionResultRepository, $logger, $elasticSearchServiceMock);
@@ -145,6 +150,7 @@ class FunctionalTest extends ApiTestCase
                             'total' => 1,
                             'hits' => $expectedResult,
                         ],
+                        '_scroll_id' => 0
                     ]
                 ),
                 [
@@ -157,7 +163,7 @@ class FunctionalTest extends ApiTestCase
 
         $clientMock = new MockHttpClient($responses);
 
-        $elasticsearchService = new ElasticSearchService($clientMock, 'http://elasticsearch:9200/');
+        $elasticsearchService = new ElasticSearchService($clientMock, 'http://fakesearch:9200/');
         $result = $elasticsearchService->getLogsFromSearch(new \DateTime('-1 day'), 'test');
 
         $this->assertEquals($expectedResult, $result, 'Result from elasticsearch does not match expected result');
@@ -180,7 +186,7 @@ class FunctionalTest extends ApiTestCase
 
         $clientMock = new MockHttpClient($responses);
 
-        $dataFakerService = new DataFakerService($clientMock, 'http://elasticsearch:9200/');
+        $dataFakerService = new DataFakerService($clientMock, 'http://fakesearch:9200/');
         $result = $dataFakerService->createElasticsearchTestData(new \DateTime());
         $this->assertTrue($result, 'createElasticsearchTestData should finish executing');
     }
@@ -261,8 +267,8 @@ class FunctionalTest extends ApiTestCase
         }
         $clientMock = new MockHttpClient($responses);
 
-        // Test FakeCommand.
-        $command = new FakeCommand(new DataFakerService($clientMock, 'http://elasticsearch:9200/'));
+        // Test FakeCommand
+        $command = new FakeCommand($this->createKernel(), new DataFakerService($clientMock, 'http://fakesearch:9200/'));
         $this->assertEquals('Add fake data to elasticsearch', $command->getDescription(), 'Description should have been set.');
         $input = new ArrayInput([
             'date' => 'today',
