@@ -150,7 +150,7 @@ class FunctionalTest extends ApiTestCase
                             'total' => 1,
                             'hits' => $expectedResult,
                         ],
-                        '_scroll_id' => 0
+                        '_scroll_id' => 0,
                     ]
                 ),
                 [
