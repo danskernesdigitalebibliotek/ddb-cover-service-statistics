@@ -279,6 +279,62 @@ class FunctionalTest extends ApiTestCase
     }
 
     /**
+     * Test that duplicates cannot exist for Entry documents.
+     */
+    public function testDuplicateEntryCannotExist()
+    {
+        // Get special container that allows fetching private services
+        $container = self::$container;
+
+        // Get services.
+        $entryRepository = $container->get(EntryRepository::class);
+        $extractionResultRepository = $container->get(ExtractionResultRepository::class);
+        $logger = $container->get(LoggerInterface::class);
+        /* @var DocumentManager $documentManager */
+        $documentManager = $container->get(DocumentManager::class);
+
+        // Create mock
+        $elasticSearchServiceMock = $this->createMock(SearchServiceInterface::class);
+        // Create one entry.
+        $mockResponse = json_decode('[{"_index":"stats_18-01-2020","_type":"logs","_id":"jp_Vt28BPlVUX1bQ2KG1","_score":0.8630463,"_source":{"message":"Cover request\/response","context":{"service":"MoreInfoService","clientID":"123456","remoteIP":"127.0.0.1","searchParameters":{"isbn":["9788740602456"]},"fileNames":["http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg"],"matches":[{"match":"http:\/\/cover-service-faktor-export.local.itkdev.dk\/9788740602456.jpg","identifier":"9788740602456","type":"isbn"}],"elasticQueryTime":0.033380985260009766},"level":200,"level_name":"INFO","channel":"statistics","datetime":"2020-01-18T08:47:21+0000"}}]');
+        $elasticSearchServiceMock
+            ->expects($this->at(0))
+            ->method('getLogsFromSearch')
+            ->will($this->returnValue($mockResponse))
+        ;
+        $elasticSearchServiceMock
+            ->expects($this->at(1))
+            ->method('getLogsFromSearch')
+            ->will($this->returnValue([]))
+        ;
+
+        $extractionService = new StatisticsExtractionService($documentManager, $entryRepository, $extractionResultRepository, $logger, $elasticSearchServiceMock);
+
+        $extractionService->extractStatistics();
+
+        $entries = $documentManager->getRepository(Entry::class)->findAll();
+        self::assertEquals(1, count($entries), 'Only one entry should exist');
+
+        // Remove the ExtractionResult entries and reimport.
+        $extractionResults = $documentManager->getRepository(ExtractionResult::class)->findAll();
+        $extractionResultCount = count($extractionResults);
+        /* @var ExtractionResult $result */
+        foreach ($extractionResults as $result) {
+            $documentManager->remove($result);
+        }
+        $documentManager->flush();
+
+        $extractionService->extractStatistics();
+
+        $entries = $documentManager->getRepository(Entry::class)->findAll();
+        $extractionResults = $documentManager->getRepository(ExtractionResult::class)->findAll();
+
+        self::assertEquals($extractionResultCount, count($extractionResults), 'The same number of extraction results should exist as before');
+
+        self::assertEquals(1, count($entries), 'Only one entry should still exist');
+    }
+
+    /**
      * Test miscellaneous.
      */
     public function testMisc()
