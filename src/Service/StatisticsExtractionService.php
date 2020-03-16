@@ -261,7 +261,7 @@ class StatisticsExtractionService
     }
 
     /**
-     * Check that an entry has not already been added and then creates an entry.
+     * Create a new entry.
      *
      * @param \DateTime $date
      *   The date of the registration in elasticsearch

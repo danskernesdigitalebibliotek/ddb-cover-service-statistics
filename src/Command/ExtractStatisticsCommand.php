@@ -55,8 +55,7 @@ class ExtractStatisticsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $section = $output->section('Sheet');
-        $progressBarSheet = new ProgressBar($section);
+        $progressBarSheet = new ProgressBar($output);
         $progressBarSheet->setFormat('[%bar%] %elapsed% (%memory%) - %message%');
         $this->extractionService->setProgressBar($progressBarSheet);
 
