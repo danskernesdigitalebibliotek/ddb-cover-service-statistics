@@ -46,8 +46,13 @@ class StatisticsExtractionService
      * @param SearchServiceInterface $elasticsearchService
      *   Service to integrate with elasticsearch
      */
-    public function __construct(DocumentManager $documentManager, EntryRepository $entryRepository, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, SearchServiceInterface $elasticsearchService)
-    {
+    public function __construct(
+        DocumentManager $documentManager,
+        EntryRepository $entryRepository,
+        ExtractionResultRepository $extractionResultRepository,
+        LoggerInterface $logger,
+        SearchServiceInterface $elasticsearchService
+    ) {
         $this->documentManager = $documentManager;
         $this->logger = $logger;
         $this->elasticSearchService = $elasticsearchService;
@@ -58,36 +63,30 @@ class StatisticsExtractionService
     /**
      * Extract new statistics.
      *
-     * @throws MongoDBException
-     * @throws \Exception
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
-    public function extractStatistics(bool $fromTheBeginning = false, ExtractionTargetInterface $target = null)
+    public function extractStatistics()
     {
         $today = new \DateTime();
 
         $this->progressStart('Starting extraction process');
 
-        // Default to MongoDB target.
-        if ($target === null) {
-            $target = new MongoDBTarget($this->documentManager, $this->entryRepository, $this->extractionResultRepository);
-        }
+        $target = new MongoDBTarget($this->documentManager, $this->entryRepository, $this->extractionResultRepository);
 
         $target->initialize();
 
         $lastExtraction = null;
 
-        if (!$fromTheBeginning) {
-            // Get latest extraction entry.
-            /* @var ExtractionResult $lastExtraction */
-            $lastExtraction = $this->extractionResultRepository->getNewestEntry();
-        }
+        // Get latest extraction entry.
+        /* @var ExtractionResult $lastExtraction */
+        $lastExtraction = $this->extractionResultRepository->getNewestEntry();
 
         // Default to 1. december 2019 to make sure we extract all statistics
         // from the start of production of CoverService.
         /* @var \DateTime $latestExtractionDate */
         $latestExtractionDate = $lastExtraction ? $lastExtraction->getDate() : new \Datetime('1 december 2019');
 
-        $numberOfDaysToSearch = (int) $today->diff($latestExtractionDate)->format('%a');
+        $numberOfDaysToSearch = (int)$today->diff($latestExtractionDate)->format('%a');
 
         $entriesAdded = 0;
 
@@ -139,7 +138,7 @@ class StatisticsExtractionService
         /* @var Entry $entry */
         foreach ($entries as $entry) {
             if (null !== $entry->getExtracted() && null !== $entry->getExtractionDate()) {
-                $diff = (int) $entry->getExtractionDate()->diff($compareDate)->format('%a');
+                $diff = (int)$entry->getExtractionDate()->diff($compareDate)->format('%a');
 
                 if (0 < $diff && $entry->getExtractionDate() < $compareDate) {
                     $this->documentManager->remove($entry);
@@ -158,7 +157,47 @@ class StatisticsExtractionService
     }
 
     /**
+     * Extract statistics for one day.
      *
+     * @param \DateTime $extractionDay
+     *   The day to search through
+     * @param \App\Model\ExtractionTargetInterface $target
+     *   The target to add entries to
+     *
+     * @throws \Exception
+     */
+    public function extractStatisticsForDay(\DateTime $extractionDay, ExtractionTargetInterface $target)
+    {
+        $this->progressStart('Starting extraction process');
+
+        $target->initialize();
+
+        $entriesAdded = 0;
+        $entriesAddedFromDay = 0;
+        $nextBatchLimit = self::BATCH_SIZE;
+
+        $this->progressMessage('Search stats for date '.$extractionDay->format('d-m-Y'));
+
+        $this->extractDay($extractionDay, $target, $entriesAdded, $entriesAddedFromDay, $nextBatchLimit);
+
+        // Reset/remove the internal batch state for the current date.
+        $this->elasticSearchService->reset();
+
+        // Save new extraction result.
+        $extractionResult = new ExtractionResult();
+        $extractionResult->setDate($extractionDay);
+        $extractionResult->setNumberOfEntriesAdded($entriesAddedFromDay);
+        $target->recordExtractionResult($extractionResult);
+
+        $target->flush();
+
+        $target->finish();
+
+        $this->progressFinish();
+    }
+
+    /**
+     * Extract statistics for one day.
      *
      * @param \DateTime $dayToSearch
      * @param \App\Model\ExtractionTargetInterface $target
@@ -206,6 +245,7 @@ class StatisticsExtractionService
                             $elasticId,
                             $agency,
                             'request_image',
+                            $matchEntry->type,
                             $matchEntry->identifier,
                             json_encode($response),
                             $matchEntry->match
@@ -218,26 +258,37 @@ class StatisticsExtractionService
                     // Version 1 of statistics logging, where matches is not set.
                     $fileNames = $statisticsEntry->_source->context->fileNames ?? [];
                     $searchIdentifiers = [];
+                    $identifierTypes = [];
 
                     // Extract identifiers from search parameters for SOAP requests
                     if (isset($statisticsEntry->_source->context->searchParameters)) {
-                        foreach ($statisticsEntry->_source->context->searchParameters as $identifiers) {
+                        foreach ($statisticsEntry->_source->context->searchParameters as $type => $identifiers) {
                             $searchIdentifiers = array_merge($searchIdentifiers, $identifiers);
+
+                            foreach ($identifiers as $identifier) {
+                                $identifierTypes[$identifier] = $type;
+                            }
                         }
                     } elseif (isset($statisticsEntry->_source->context->isIdentifiers)) {
                         // Extract identifiers from isIdentifiers for REST_API requests
                         $searchIdentifiers = $statisticsEntry->_source->context->isIdentifiers;
+
+                        foreach ($statisticsEntry->_source->context->isIdentifiers as $identifier) {
+                            $identifierTypes[$identifier] = $statisticsEntry->_source->context->isType;
+                        }
                     }
 
                     // If only searching for one identifier and only finding on file
                     // create success entry.
                     if (1 === count($searchIdentifiers) && 1 === count($fileNames)) {
+                        $identifier = array_pop($searchIdentifiers);
                         $entry = $this->createEntry(
                             new \DateTime($statisticsEntry->_source->datetime),
                             $elasticId,
                             $agency,
                             'request_image',
-                            array_pop($searchIdentifiers),
+                            $identifierTypes[$identifier],
+                            $identifier,
                             json_encode(['message' => 'ok']),
                             array_pop($fileNames)
                         );
@@ -256,6 +307,7 @@ class StatisticsExtractionService
                                 $elasticId,
                                 $agency,
                                 'request_image',
+                                $identifierTypes[$identifier],
                                 $identifier,
                                 json_encode(['message' => 'image not found']),
                                 null
@@ -268,13 +320,14 @@ class StatisticsExtractionService
                         continue;
                     }
 
-                    // Otherwise, report results as undetermined.
+                    // Otherwise, we do not know which files match the hits. Therefore, report results as undetermined.
                     foreach ($searchIdentifiers as $identifier) {
                         $entry = $this->createEntry(
                             new \DateTime($statisticsEntry->_source->datetime),
                             $elasticId,
                             $agency,
                             'request_image',
+                            $identifierTypes[$identifier],
                             $identifier,
                             json_encode(['message' => 'image maybe found']),
                             'undetermined'
@@ -301,6 +354,8 @@ class StatisticsExtractionService
      *   The agency connected with the event
      * @param string $event
      *   The event
+     * @param string $identifierType
+     *   The identifier type
      * @param string $materialId
      *   The material id of the event
      * @param string $response
@@ -310,7 +365,7 @@ class StatisticsExtractionService
      *
      * @return Entry
      */
-    private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, string $materialId, string $response, ?string $imageId): Entry
+    private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, string $identifierType, string $materialId, string $response, ?string $imageId): Entry
     {
         $entry = new Entry();
 
@@ -319,6 +374,7 @@ class StatisticsExtractionService
         $entry->setClientId('CoverService');
         $entry->setAgency($agency);
         $entry->setEvent($event);
+        $entry->setIdentifierType($identifierType);
         $entry->setMaterialId($materialId);
         $entry->setResponse($response);
         $entry->setImageId($imageId);
