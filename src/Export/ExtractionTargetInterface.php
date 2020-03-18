@@ -4,7 +4,7 @@
  * Contains interface for an ExtractionTarget.
  */
 
-namespace App\Model;
+namespace App\Export;
 
 use App\Document\Entry;
 use App\Document\ExtractionResult;

@@ -7,7 +7,7 @@
 
 namespace App\Command;
 
-use App\Model\CsvTarget;
+use App\Export\CsvTarget;
 use App\Service\StatisticsExtractionService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;

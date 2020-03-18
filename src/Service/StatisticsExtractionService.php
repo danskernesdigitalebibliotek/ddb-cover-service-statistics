@@ -9,8 +9,8 @@ namespace App\Service;
 
 use App\Document\Entry;
 use App\Document\ExtractionResult;
-use App\Model\ExtractionTargetInterface;
-use App\Model\MongoDBTarget;
+use App\Export\ExtractionTargetInterface;
+use App\Export\MongoDBTarget;
 use App\Repository\EntryRepository;
 use App\Repository\ExtractionResultRepository;
 use Doctrine\ODM\MongoDB\DocumentManager;
@@ -156,7 +156,7 @@ class StatisticsExtractionService
      *
      * @param \DateTime $extractionDay
      *   The day to search through
-     * @param \App\Model\ExtractionTargetInterface $target
+     * @param \App\Export\ExtractionTargetInterface $target
      *   The target to add entries to
      *
      * @throws \Exception
@@ -195,7 +195,7 @@ class StatisticsExtractionService
      * Extract statistics for one day.
      *
      * @param \DateTime $dayToSearch
-     * @param \App\Model\ExtractionTargetInterface $target
+     * @param \App\Export\ExtractionTargetInterface $target
      * @param int $entriesAdded
      * @param int $entriesAddedFromDay
      * @param int $nextBatchLimit
