@@ -69,7 +69,7 @@ class FakeCommand extends Command
         if (null === $dateString) {
             $io->warning('This will create fake content in elasticsearch. If you want to continue, enter a date below.');
 
-            $dateString = $io->ask('Select a date (for example "7 december 2019" or "-2 days"). Defaults to today.', 'today');
+            $dateString = $io->ask('Select a date (for example "7 december 2019" or "-2 days"). Defaults to now.', 'now');
         }
 
         $date = new \DateTime($dateString);
