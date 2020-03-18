@@ -28,7 +28,7 @@ class CsvTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function initialize(): void
     {
@@ -53,7 +53,7 @@ class CsvTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function finish(): void
     {
@@ -61,7 +61,7 @@ class CsvTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function addEntry(Entry $entry): void
     {
@@ -81,7 +81,7 @@ class CsvTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function entryExists($id): bool
     {
@@ -90,12 +90,16 @@ class CsvTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function recordExtractionResult(ExtractionResult $extractionResult): void {}
+    public function recordExtractionResult(ExtractionResult $extractionResult): void
+    {
+    }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function flush(): void {}
+    public function flush(): void
+    {
+    }
 }

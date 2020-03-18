@@ -67,6 +67,7 @@ class ExtractStatisticsSingleDayCommand extends Command
      * {@inheritdoc}
      *
      * @suppress PhanUndeclaredMethod
+     *
      * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -89,8 +90,7 @@ class ExtractStatisticsSingleDayCommand extends Command
 
         if ($input->hasArgument('filename')) {
             $filename = $input->getArgument('filename');
-        }
-        else {
+        } else {
             $filename = $dayToExtract->format('d-m-Y').'_extracted-at-'.$now->format('d-m-Y_H:i').'.csv';
         }
 

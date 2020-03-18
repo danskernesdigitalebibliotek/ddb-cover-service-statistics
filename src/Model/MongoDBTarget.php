@@ -36,17 +36,21 @@ class MongoDBTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function initialize(): void {}
+    public function initialize(): void
+    {
+    }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
-    public function finish(): void {}
+    public function finish(): void
+    {
+    }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function addEntry(Entry $entry): void
     {
@@ -54,7 +58,7 @@ class MongoDBTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function entryExists($id): bool
     {
@@ -62,7 +66,7 @@ class MongoDBTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function recordExtractionResult(ExtractionResult $extractionResult): void
     {
@@ -70,7 +74,8 @@ class MongoDBTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
+     *
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
     public function flush(): void

@@ -49,6 +49,7 @@ class ExtractStatisticsCommand extends Command
      * {@inheritdoc}
      *
      * @suppress PhanUndeclaredMethod
+     *
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int

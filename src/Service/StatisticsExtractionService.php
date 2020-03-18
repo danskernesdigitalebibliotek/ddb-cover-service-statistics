@@ -86,7 +86,7 @@ class StatisticsExtractionService
         /* @var \DateTime $latestExtractionDate */
         $latestExtractionDate = $lastExtraction ? $lastExtraction->getDate() : new \Datetime('1 december 2019');
 
-        $numberOfDaysToSearch = (int)$today->diff($latestExtractionDate)->format('%a');
+        $numberOfDaysToSearch = (int) $today->diff($latestExtractionDate)->format('%a');
 
         $entriesAdded = 0;
 
@@ -138,7 +138,7 @@ class StatisticsExtractionService
         /* @var Entry $entry */
         foreach ($entries as $entry) {
             if (null !== $entry->getExtracted() && null !== $entry->getExtractionDate()) {
-                $diff = (int)$entry->getExtractionDate()->diff($compareDate)->format('%a');
+                $diff = (int) $entry->getExtractionDate()->diff($compareDate)->format('%a');
 
                 if (0 < $diff && $entry->getExtractionDate() < $compareDate) {
                     $this->documentManager->remove($entry);
