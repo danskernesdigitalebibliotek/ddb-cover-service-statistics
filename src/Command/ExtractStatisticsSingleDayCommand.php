@@ -86,12 +86,10 @@ class ExtractStatisticsSingleDayCommand extends Command
         $progressBarSheet->setFormat('[%bar%] %elapsed% (%memory%) - %message%');
         $this->extractionService->setProgressBar($progressBarSheet);
 
-        $now = new \DateTime();
+        $filename = $input->getArgument('filename');
 
-        if ($input->hasArgument('filename')) {
-            $filename = $input->getArgument('filename');
-        } else {
-            $filename = $dayToExtract->format('d-m-Y').'_extracted-at-'.$now->format('d-m-Y_H:i').'.csv';
+        if (!$filename) {
+            throw new \RuntimeException('Invalid filename argument.');
         }
 
         $target = new CsvTarget($filename);

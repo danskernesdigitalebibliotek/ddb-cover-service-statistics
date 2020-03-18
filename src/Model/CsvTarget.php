@@ -10,6 +10,9 @@ use App\Document\Entry;
 use App\Document\ExtractionResult;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 
+/**
+ * Class CsvTarget.
+ */
 class CsvTarget implements ExtractionTargetInterface
 {
     /* @var \Box\Spout\Writer\WriterInterface $writer */

@@ -46,13 +46,8 @@ class StatisticsExtractionService
      * @param SearchServiceInterface $elasticsearchService
      *   Service to integrate with elasticsearch
      */
-    public function __construct(
-        DocumentManager $documentManager,
-        EntryRepository $entryRepository,
-        ExtractionResultRepository $extractionResultRepository,
-        LoggerInterface $logger,
-        SearchServiceInterface $elasticsearchService
-    ) {
+    public function __construct(DocumentManager $documentManager, EntryRepository $entryRepository, ExtractionResultRepository $extractionResultRepository, LoggerInterface $logger, SearchServiceInterface $elasticsearchService)
+    {
         $this->documentManager = $documentManager;
         $this->logger = $logger;
         $this->elasticSearchService = $elasticsearchService;
