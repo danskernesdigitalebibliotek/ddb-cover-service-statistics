@@ -84,6 +84,11 @@ class Entry
     protected $extracted;
 
     /**
+     * @ODM\Field(type="string")
+     */
+    protected $identifierType;
+
+    /**
      * @return string
      */
     public function getId()
@@ -249,5 +254,21 @@ class Entry
     public function setElasticId($elasticId): void
     {
         $this->elasticId = $elasticId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifierType(): string
+    {
+        return $this->identifierType;
+    }
+
+    /**
+     * @param string $identifierType
+     */
+    public function setIdentifierType($identifierType): void
+    {
+        $this->identifierType = $identifierType;
     }
 }

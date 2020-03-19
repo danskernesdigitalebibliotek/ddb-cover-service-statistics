@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Contains a command to extract statistics from Elasticsearch.
+ * Contains a command to extract statistics.
  */
 
 namespace App\Command;
@@ -50,6 +49,8 @@ class ExtractStatisticsCommand extends Command
      * {@inheritdoc}
      *
      * @suppress PhanUndeclaredMethod
+     *
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -59,7 +60,7 @@ class ExtractStatisticsCommand extends Command
         $progressBarSheet->setFormat('[%bar%] %elapsed% (%memory%) - %message%');
         $this->extractionService->setProgressBar($progressBarSheet);
 
-        $this->extractionService->extractStatistics();
+        $this->extractionService->extractLatestStatistics();
 
         $io->success('Data extracted successfully.');
 
