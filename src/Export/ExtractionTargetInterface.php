@@ -64,7 +64,7 @@ interface ExtractionTargetInterface
      * @param array $types
      *   The selected types
      */
-    public function setExtractionTypes(array $types = null): void;
+    public function setExtractionTypes(array $types): void;
 
     /**
      * Returns true if the target accepts the type.

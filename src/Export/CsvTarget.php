@@ -111,7 +111,7 @@ class CsvTarget implements ExtractionTargetInterface
     /**
      * {@inheritdoc}
      */
-    public function setExtractionTypes(array $types = null): void
+    public function setExtractionTypes(array $types): void
     {
         $this->types = $types;
     }
