@@ -8,9 +8,14 @@ Change into cover service namespace.
 kubectx ddb-cover-service
 ```
 
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
 Deploy MongoDB database and remember to change the password variable in the command.
 ```bash
-helm install faktor-mongo stable/mongodb --set mongodbUsername=faktor,mongodbPassword=faktor-1234,mongodbDatabase=faktor
+kubectl apply -f mongodb-storage.yaml
+helm install faktor-mongo bitnami/mongodb --namespace=cover-service --set mongodbUsername=faktor,mongodbPassword=faktor-1234,mongodbDatabase=faktor,metrics.enabled=true,persistence.existingClaim=mongodb-managed-disk
 ```
 
 Deploy the application.
