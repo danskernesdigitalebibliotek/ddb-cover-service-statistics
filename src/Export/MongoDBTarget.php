@@ -95,7 +95,7 @@ class MongoDBTarget implements ExtractionTargetInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function acceptType(string $type): bool
     {

@@ -117,7 +117,7 @@ class ExtractStatisticsDaysCommand extends Command
         $numberOfDaysToSearch = (int) $dateTo->diff($dateFrom)->format('%a');
 
         $selectedDays = [$dateFrom];
-        for ($i = 1; $i <= $numberOfDaysToSearch; $i++) {
+        for ($i = 1; $i <= $numberOfDaysToSearch; ++$i) {
             $selectedDays[] = (new \DateTime($dateFrom->format('c')))->add(new \DateInterval('P'.$i.'D'));
         }
 
@@ -129,6 +129,7 @@ class ExtractStatisticsDaysCommand extends Command
             if (in_array($type, ['hit', 'nohit', 'undetermined']) && !in_array($type, $carry)) {
                 $carry[] = $type;
             }
+
             return $carry;
         }, []);
 
