@@ -241,7 +241,7 @@ class StatisticsExtractionService
                             $response['message'] = 'ok';
                         }
 
-                        if ($target->acceptType(null === $matchEntry->match ? 'nohit' : 'hit')) {
+                        if ($target->acceptsType(null === $matchEntry->match ? 'nohit' : 'hit')) {
                             $entry = $this->createEntry(
                                 new \DateTime($statisticsEntry->_source->datetime),
                                 $elasticId,
@@ -286,7 +286,7 @@ class StatisticsExtractionService
                     if (1 === count($searchIdentifiers) && 1 === count($fileNames)) {
                         $identifier = array_pop($searchIdentifiers);
 
-                        if ($target->acceptType('hit')) {
+                        if ($target->acceptsType('hit')) {
                             $entry = $this->createEntry(
                                 new \DateTime($statisticsEntry->_source->datetime),
                                 $elasticId,
@@ -308,7 +308,7 @@ class StatisticsExtractionService
                     // If fileNames is empty report failure for each identifier.
                     if (0 === count($fileNames)) {
                         foreach ($searchIdentifiers as $identifier) {
-                            if ($target->acceptType('nohit')) {
+                            if ($target->acceptsType('nohit')) {
                                 $entry = $this->createEntry(
                                     new \DateTime($statisticsEntry->_source->datetime),
                                     $elasticId,
@@ -330,7 +330,7 @@ class StatisticsExtractionService
 
                     // Otherwise, we do not know which files match the hits. Therefore, report results as undetermined.
                     foreach ($searchIdentifiers as $identifier) {
-                        if ($target->acceptType('undetermined')) {
+                        if ($target->acceptsType('undetermined')) {
                             $entry = $this->createEntry(
                                 new \DateTime($statisticsEntry->_source->datetime),
                                 $elasticId,

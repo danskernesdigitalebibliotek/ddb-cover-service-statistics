@@ -26,9 +26,9 @@ class MongoDBTarget implements ExtractionTargetInterface
     /**
      * MongoDBTarget constructor.
      *
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param \App\Repository\EntryRepository $entryRepository
-     * @param \App\Repository\ExtractionResultRepository $extractionResultRepository
+     * @param DocumentManager $documentManager
+     * @param EntryRepository $entryRepository
+     * @param ExtractionResultRepository $extractionResultRepository
      */
     public function __construct(DocumentManager $documentManager, EntryRepository $entryRepository, ExtractionResultRepository $extractionResultRepository)
     {
@@ -42,6 +42,7 @@ class MongoDBTarget implements ExtractionTargetInterface
      */
     public function initialize(): void
     {
+        // Since we use services to write to the database, we do not need to initialize anything.
     }
 
     /**
@@ -49,6 +50,7 @@ class MongoDBTarget implements ExtractionTargetInterface
      */
     public function finish(): void
     {
+        // Nothing needs to be closed.
     }
 
     /**
@@ -97,7 +99,7 @@ class MongoDBTarget implements ExtractionTargetInterface
     /**
      * {@inheritdoc}
      */
-    public function acceptType(string $type): bool
+    public function acceptsType(string $type): bool
     {
         // Accepts all types.
         return true;

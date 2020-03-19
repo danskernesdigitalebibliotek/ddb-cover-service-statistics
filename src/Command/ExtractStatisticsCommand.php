@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains a command to extract statistics from Elasticsearch.
+ * Contains a command to extract statistics.
  */
 
 namespace App\Command;

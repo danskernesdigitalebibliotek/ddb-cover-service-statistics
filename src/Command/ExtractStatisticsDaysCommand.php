@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains a command to extract statistics from Elasticsearch.
+ * Contains a command to extract statistics.
  */
 
 namespace App\Command;
@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Class ExtractStatisticsForDayCommand.
+ * Class ExtractStatisticsDaysCommand.
  */
 class ExtractStatisticsDaysCommand extends Command
 {
@@ -28,7 +28,7 @@ class ExtractStatisticsDaysCommand extends Command
     protected static $defaultName = 'app:extract-days';
 
     /**
-     * ExtractStatisticsCommand constructor.
+     * ExtractStatisticsDaysCommand constructor.
      *
      * @param StatisticsExtractionService $extractionService
      *   The extraction service
@@ -56,18 +56,20 @@ class ExtractStatisticsDaysCommand extends Command
             null
         );
 
-        $this->addArgument(
-            'dateFrom',
-            InputArgument::REQUIRED,
+        $this->addOption(
+            'from',
+            null,
+            InputOption::VALUE_REQUIRED,
             sprintf('Extract searches from this day. Format: %s', $this->dateFormat),
             null
         );
 
-        $this->addArgument(
-            'dateTo',
-            InputArgument::REQUIRED,
-            sprintf('Extract searches until (including) this day. Format: %s', $this->dateFormat),
-            null
+        $this->addOption(
+            'to',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            sprintf('Extract searches until (including) this day. Defaults to today. Format: %s', $this->dateFormat),
+            (new \DateTime('today'))->format($this->dateFormat)
         );
 
         $this->addOption(
@@ -95,23 +97,23 @@ class ExtractStatisticsDaysCommand extends Command
             throw new \RuntimeException('Invalid filename argument.');
         }
 
-        $rawDateFrom = $input->getArgument('dateFrom');
+        $rawDateFrom = $input->getOption('from');
         $dateFrom = \DateTime::createFromFormat($this->dateFormat, $rawDateFrom);
 
         if (!$dateFrom) {
-            throw new \RuntimeException('Invalid date format for dateFrom argument.');
+            throw new \RuntimeException('Invalid date format for from argument.');
         }
 
-        $rawDateTo = $input->getArgument('dateTo');
+        $rawDateTo = $input->getOption('to');
         $dateTo = \DateTime::createFromFormat($this->dateFormat, $rawDateTo);
 
         if (!$dateTo) {
-            throw new \RuntimeException('Invalid date format for dateTo argument.');
+            throw new \RuntimeException('Invalid date format for to argument.');
         }
 
-        // Make sure dateTo is less than or equal to dateFrom.
-        if ($dateTo > $dateTo) {
-            throw new \RuntimeException('Invalid date selection: dateFrom should not be higher than dateTo.');
+        // Make sure dateFrom is less than or equal to dateFrom.
+        if ($dateFrom > $dateTo) {
+            throw new \RuntimeException('Invalid date selection: from should not be later than to.');
         }
 
         $numberOfDaysToSearch = (int) $dateTo->diff($dateFrom)->format('%a');
@@ -128,6 +130,8 @@ class ExtractStatisticsDaysCommand extends Command
         $types = array_reduce($typesExploded, function ($carry, $type) {
             if (in_array($type, ['hit', 'nohit', 'undetermined']) && !in_array($type, $carry)) {
                 $carry[] = $type;
+            } else {
+                throw new \RuntimeException('Invalid types: '.$type.' is not a supported type');
             }
 
             return $carry;

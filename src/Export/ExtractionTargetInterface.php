@@ -74,5 +74,5 @@ interface ExtractionTargetInterface
      *
      * @return bool
      */
-    public function acceptType(string $type): bool;
+    public function acceptsType(string $type): bool;
 }

@@ -9,13 +9,14 @@ namespace App\Export;
 use App\Document\Entry;
 use App\Document\ExtractionResult;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+use Box\Spout\Writer\WriterInterface;
 
 /**
  * Class CsvTarget.
  */
 class CsvTarget implements ExtractionTargetInterface
 {
-    /* @var \Box\Spout\Writer\WriterInterface $writer */
+    /* @var WriterInterface $writer */
     private $writer;
     /* @var string $filename */
     private $filename;
@@ -30,6 +31,16 @@ class CsvTarget implements ExtractionTargetInterface
     public function __construct(string $filename)
     {
         $this->filename = $filename;
+    }
+
+    /**
+     * Make sure the writer has been closed.
+     */
+    public function __destruct()
+    {
+        if (isset($this->writer)) {
+            $this->writer->close();
+        }
     }
 
     /**
@@ -99,6 +110,7 @@ class CsvTarget implements ExtractionTargetInterface
      */
     public function recordExtractionResult(ExtractionResult $extractionResult): void
     {
+        // We do not do anything to the result, since we are writing to a file.
     }
 
     /**
@@ -106,6 +118,7 @@ class CsvTarget implements ExtractionTargetInterface
      */
     public function flush(): void
     {
+        // No need to flush results, since we are streaming rows to the file.
     }
 
     /**
@@ -119,13 +132,12 @@ class CsvTarget implements ExtractionTargetInterface
     /**
      * {@inheritdoc}
      */
-    public function acceptType(string $type): bool
+    public function acceptsType(string $type): bool
     {
         if (null !== $this->types) {
             return in_array($type, $this->types);
         }
 
-        // Defaults to true.
         return true;
     }
 }
