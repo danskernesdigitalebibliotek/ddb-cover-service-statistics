@@ -125,7 +125,7 @@ class ExtractStatisticsDaysCommand extends Command
 
         $rawTypes = $input->getOption('types');
 
-        $typesExploded = explode(',', $rawTypes);
+        $typesExploded = is_null($rawTypes) ? [] : explode(',', $rawTypes);
 
         $types = array_reduce($typesExploded, function ($carry, $type) {
             if (in_array($type, ['hit', 'nohit', 'undetermined']) && !in_array($type, $carry)) {
