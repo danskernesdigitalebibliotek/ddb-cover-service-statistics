@@ -101,7 +101,7 @@ class FunctionalTest extends ApiTestCase
 
         $extractionService = new StatisticsExtractionService($documentManager, $entryRepository, $extractionResultRepository, $logger, $elasticSearchServiceMock);
 
-        $extractionService->extractStatistics();
+        $extractionService->extractLatestStatistics();
 
         $entries = $documentManager->getRepository(Entry::class)->findAll();
 
@@ -310,7 +310,7 @@ class FunctionalTest extends ApiTestCase
 
         $extractionService = new StatisticsExtractionService($documentManager, $entryRepository, $extractionResultRepository, $logger, $elasticSearchServiceMock);
 
-        $extractionService->extractStatistics();
+        $extractionService->extractLatestStatistics();
 
         $entries = $documentManager->getRepository(Entry::class)->findAll();
         self::assertEquals(1, count($entries), 'Only one entry should exist');
@@ -324,7 +324,7 @@ class FunctionalTest extends ApiTestCase
         }
         $documentManager->flush();
 
-        $extractionService->extractStatistics();
+        $extractionService->extractLatestStatistics();
 
         $entries = $documentManager->getRepository(Entry::class)->findAll();
         $extractionResults = $documentManager->getRepository(ExtractionResult::class)->findAll();

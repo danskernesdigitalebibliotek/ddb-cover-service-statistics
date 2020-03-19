@@ -60,7 +60,7 @@ class ExtractStatisticsCommand extends Command
         $progressBarSheet->setFormat('[%bar%] %elapsed% (%memory%) - %message%');
         $this->extractionService->setProgressBar($progressBarSheet);
 
-        $this->extractionService->extractStatistics();
+        $this->extractionService->extractLatestStatistics();
 
         $io->success('Data extracted successfully.');
 

@@ -19,6 +19,8 @@ class CsvTarget implements ExtractionTargetInterface
     private $writer;
     /* @var string $filename */
     private $filename;
+    /* @var array $types */
+    private $types = null;
 
     /**
      * CsvTarget constructor.
@@ -104,5 +106,26 @@ class CsvTarget implements ExtractionTargetInterface
      */
     public function flush(): void
     {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setExtractionTypes(array $types = null): void
+    {
+        $this->types = $types;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function acceptType(string $type): bool
+    {
+        if (null !== $this->types) {
+            return in_array($type, $this->types);
+        }
+
+        // Defaults to true.
+        return true;
     }
 }

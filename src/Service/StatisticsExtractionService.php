@@ -60,7 +60,7 @@ class StatisticsExtractionService
      *
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
-    public function extractStatistics()
+    public function extractLatestStatistics()
     {
         $today = new \DateTime();
 
@@ -154,35 +154,41 @@ class StatisticsExtractionService
     /**
      * Extract statistics for one day.
      *
-     * @param \DateTime $extractionDay
-     *   The day to search through
+     * @param array $days
+     *   Array of \DateTime. Days to extract
      * @param \App\Export\ExtractionTargetInterface $target
      *   The target to add entries to
      *
      * @throws \Exception
      */
-    public function extractStatisticsForDay(\DateTime $extractionDay, ExtractionTargetInterface $target)
+    public function extractStatisticsForDays(array $days, ExtractionTargetInterface $target)
     {
         $this->progressStart('Starting extraction process');
 
         $target->initialize();
 
         $entriesAdded = 0;
-        $entriesAddedFromDay = 0;
-        $nextBatchLimit = self::BATCH_SIZE;
 
-        $this->progressMessage('Search stats for date '.$extractionDay->format('d-m-Y'));
+        /* @var \DateTime $day */
+        foreach ($days as $day) {
+            $entriesAddedFromDay = 0;
+            $nextBatchLimit = self::BATCH_SIZE;
 
-        $this->extractDay($extractionDay, $target, $entriesAdded, $entriesAddedFromDay, $nextBatchLimit);
+            $this->progressMessage('Search stats for date '.$day->format('d-m-Y'));
 
-        // Reset/remove the internal batch state for the current date.
-        $this->elasticSearchService->reset();
+            $this->extractDay($day, $target, $entriesAdded, $entriesAddedFromDay, $nextBatchLimit);
 
-        // Save new extraction result.
-        $extractionResult = new ExtractionResult();
-        $extractionResult->setDate($extractionDay);
-        $extractionResult->setNumberOfEntriesAdded($entriesAddedFromDay);
-        $target->recordExtractionResult($extractionResult);
+            // Reset/remove the internal batch state for the current date.
+            $this->elasticSearchService->reset();
+
+            // Save new extraction result.
+            $extractionResult = new ExtractionResult();
+            $extractionResult->setDate($day);
+            $extractionResult->setNumberOfEntriesAdded($entriesAddedFromDay);
+            $target->recordExtractionResult($extractionResult);
+
+            $target->flush();
+        }
 
         $target->flush();
 
@@ -235,19 +241,21 @@ class StatisticsExtractionService
                             $response['message'] = 'ok';
                         }
 
-                        $entry = $this->createEntry(
-                            new \DateTime($statisticsEntry->_source->datetime),
-                            $elasticId,
-                            $agency,
-                            'request_image',
-                            $matchEntry->type,
-                            $matchEntry->identifier,
-                            json_encode($response),
-                            $matchEntry->match
-                        );
-                        $target->addEntry($entry);
-                        ++$entriesAdded;
-                        ++$entriesAddedFromDay;
+                        if ($target->acceptType(null === $matchEntry->match ? 'nohit' : 'hit')) {
+                            $entry = $this->createEntry(
+                                new \DateTime($statisticsEntry->_source->datetime),
+                                $elasticId,
+                                $agency,
+                                'request_image',
+                                $matchEntry->type,
+                                $matchEntry->identifier,
+                                json_encode($response),
+                                $matchEntry->match
+                            );
+                            $target->addEntry($entry);
+                            ++$entriesAdded;
+                            ++$entriesAddedFromDay;
+                        }
                     }
                 } else {
                     // Version 1 of statistics logging, where matches is not set.
@@ -277,26 +285,8 @@ class StatisticsExtractionService
                     // create success entry.
                     if (1 === count($searchIdentifiers) && 1 === count($fileNames)) {
                         $identifier = array_pop($searchIdentifiers);
-                        $entry = $this->createEntry(
-                            new \DateTime($statisticsEntry->_source->datetime),
-                            $elasticId,
-                            $agency,
-                            'request_image',
-                            $identifierTypes[$identifier],
-                            $identifier,
-                            json_encode(['message' => 'ok']),
-                            array_pop($fileNames)
-                        );
-                        $target->addEntry($entry);
-                        ++$entriesAdded;
-                        ++$entriesAddedFromDay;
 
-                        continue;
-                    }
-
-                    // If fileNames is empty report failure for each identifier.
-                    if (0 === count($fileNames)) {
-                        foreach ($searchIdentifiers as $identifier) {
+                        if ($target->acceptType('hit')) {
                             $entry = $this->createEntry(
                                 new \DateTime($statisticsEntry->_source->datetime),
                                 $elasticId,
@@ -304,8 +294,8 @@ class StatisticsExtractionService
                                 'request_image',
                                 $identifierTypes[$identifier],
                                 $identifier,
-                                json_encode(['message' => 'image not found']),
-                                null
+                                json_encode(['message' => 'ok']),
+                                array_pop($fileNames)
                             );
                             $target->addEntry($entry);
                             ++$entriesAdded;
@@ -315,21 +305,46 @@ class StatisticsExtractionService
                         continue;
                     }
 
+                    // If fileNames is empty report failure for each identifier.
+                    if (0 === count($fileNames)) {
+                        foreach ($searchIdentifiers as $identifier) {
+                            if ($target->acceptType('nohit')) {
+                                $entry = $this->createEntry(
+                                    new \DateTime($statisticsEntry->_source->datetime),
+                                    $elasticId,
+                                    $agency,
+                                    'request_image',
+                                    $identifierTypes[$identifier],
+                                    $identifier,
+                                    json_encode(['message' => 'image not found']),
+                                    null
+                                );
+                                $target->addEntry($entry);
+                                ++$entriesAdded;
+                                ++$entriesAddedFromDay;
+                            }
+                        }
+
+                        continue;
+                    }
+
                     // Otherwise, we do not know which files match the hits. Therefore, report results as undetermined.
                     foreach ($searchIdentifiers as $identifier) {
-                        $entry = $this->createEntry(
-                            new \DateTime($statisticsEntry->_source->datetime),
-                            $elasticId,
-                            $agency,
-                            'request_image',
-                            $identifierTypes[$identifier],
-                            $identifier,
-                            json_encode(['message' => 'image maybe found']),
-                            'undetermined'
-                        );
-                        $target->addEntry($entry);
-                        ++$entriesAdded;
-                        ++$entriesAddedFromDay;
+                        if ($target->acceptType('undetermined')) {
+                            $entry = $this->createEntry(
+                                new \DateTime($statisticsEntry->_source->datetime),
+                                $elasticId,
+                                $agency,
+                                'request_image',
+                                $identifierTypes[$identifier],
+                                $identifier,
+                                json_encode(['message' => 'image maybe found']),
+                                'undetermined'
+                            );
+                            $target->addEntry($entry);
+                            ++$entriesAdded;
+                            ++$entriesAddedFromDay;
+                        }
                     }
                 }
                 $this->progressAdvance();

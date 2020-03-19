@@ -54,4 +54,25 @@ interface ExtractionTargetInterface
      * Flush the target to free memory.
      */
     public function flush(): void;
+
+    /**
+     * Select which types should be extracted.
+     *
+     * Default: all
+     * Types: 'hit', 'nohit', 'undetermined'.
+     *
+     * @param array $types
+     *   The selected types
+     */
+    public function setExtractionTypes(array $types = null): void;
+
+    /**
+     * Returns true if the target accepts the type.
+     *
+     * @param string $type
+     *   The type. Types: 'hit', 'nohit', 'undetermined'.
+     *
+     * @return bool
+     */
+    public function acceptType(string $type): bool;
 }

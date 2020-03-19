@@ -20,6 +20,8 @@ class MongoDBTarget implements ExtractionTargetInterface
     private $documentManager;
     private $extractionResultRepository;
     private $entryRepository;
+    /* @var array $types */
+    private $types;
 
     /**
      * MongoDBTarget constructor.
@@ -82,5 +84,22 @@ class MongoDBTarget implements ExtractionTargetInterface
     {
         $this->documentManager->flush();
         $this->documentManager->clear();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setExtractionTypes(array $types = null): void
+    {
+        $this->types = $types;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function acceptType(string $type): bool
+    {
+        // Accepts all types.
+        return true;
     }
 }
