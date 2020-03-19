@@ -9,14 +9,13 @@ namespace App\Export;
 use App\Document\Entry;
 use App\Document\ExtractionResult;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
-use Box\Spout\Writer\WriterInterface;
 
 /**
  * Class CsvTarget.
  */
 class CsvTarget implements ExtractionTargetInterface
 {
-    /* @var WriterInterface $writer */
+    /* @var \Box\Spout\Writer\WriterInterface $writer */
     private $writer;
     /* @var string $filename */
     private $filename;
