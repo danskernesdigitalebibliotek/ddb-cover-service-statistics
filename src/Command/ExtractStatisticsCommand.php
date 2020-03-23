@@ -20,7 +20,7 @@ class ExtractStatisticsCommand extends Command
 {
     private $extractionService;
 
-    protected static $defaultName = 'app:extract-statistics';
+    protected static $defaultName = 'app:extract:latest';
 
     /**
      * ExtractStatisticsCommand constructor.

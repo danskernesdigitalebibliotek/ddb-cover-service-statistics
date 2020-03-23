@@ -2,12 +2,12 @@
 
 /**
  * @file
- * Contains a command to create fake content in Elasticsearch.
+ * Contains a command to load fixtures into Elasticsearch.
  */
 
 namespace App\Command;
 
-use App\Test\DataFakerService;
+use App\Fixtures\FixturesService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,28 +16,28 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
- * Class FakeElasticsearchContentCommand.
+ * Class LoadFixturesCommand.
  */
-class FakeCommand extends Command
+class LoadFixturesCommand extends Command
 {
-    private $fakerService;
+    private $fixturesService;
     private $environment;
 
-    protected static $defaultName = 'app:fake-content';
+    protected static $defaultName = 'app:fixtures:load';
 
     /**
      * ExtractStatisticsCommand constructor.
      *
      * @param KernelInterface $kernel
      *   The kernel
-     * @param DataFakerService $fakerService
-     *   The faker service
+     * @param FixturesService $fixturesService
+     *   The fixture service
      * @param string|null $name
      *   The name of the command; passing null means it must be set in configure()
      */
-    public function __construct(KernelInterface $kernel, DataFakerService $fakerService, string $name = null)
+    public function __construct(KernelInterface $kernel, FixturesService $fixturesService, string $name = null)
     {
-        $this->fakerService = $fakerService;
+        $this->fixturesService = $fixturesService;
         $this->environment = $kernel->getEnvironment();
 
         parent::__construct($name);
@@ -48,7 +48,7 @@ class FakeCommand extends Command
      */
     protected function configure()
     {
-        $this->setDescription('Add fake data to elasticsearch');
+        $this->setDescription('Load fixtures into elasticsearch');
         $this->addArgument('date', InputArgument::OPTIONAL, 'Day to add entries to');
     }
 
@@ -60,22 +60,22 @@ class FakeCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         if ('prod' === $this->environment) {
-            $io->error('This fake content command cannot run in prod environment.');
+            $io->error('This command cannot be run in prod environment.');
 
             return 1;
         }
 
         $dateString = $input->getArgument('date');
         if (null === $dateString) {
-            $io->warning('This will create fake content in elasticsearch. If you want to continue, enter a date below.');
+            $io->warning('This will load fixtures into elasticsearch. If you want to continue, enter a date below.');
 
             $dateString = $io->ask('Select a date (for example "7 december 2019" or "-2 days"). Defaults to now.', 'now');
         }
 
         $date = new \DateTime($dateString);
-        $this->fakerService->createElasticsearchTestData($date);
+        $this->fixturesService->runFixture($date);
 
-        $io->success('Adding fake data to elasticsearch successfully.');
+        $io->success('Fixtures loaded into elasticsearch successfully.');
 
         return 0;
     }

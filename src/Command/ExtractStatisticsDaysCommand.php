@@ -25,7 +25,7 @@ class ExtractStatisticsDaysCommand extends Command
     private $extractionService;
     private $dateFormat = 'd-m-Y';
 
-    protected static $defaultName = 'app:extract-days';
+    protected static $defaultName = 'app:extract:days';
 
     /**
      * ExtractStatisticsDaysCommand constructor.

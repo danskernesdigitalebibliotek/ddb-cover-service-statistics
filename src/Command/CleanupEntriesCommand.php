@@ -19,19 +19,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class CleanupEntriesCommand extends Command
 {
-    protected static $defaultName = 'app:cleanup-entries';
+    protected static $defaultName = 'app:cleanup:entries';
 
     private $extractionService;
 
     /**
      * CleanupEntriesCommand constructor.
      *
-     * @param StatisticsExtractionService $fakerService
+     * @param StatisticsExtractionService $extractionService
      *   The statistics extraction service
      */
-    public function __construct(StatisticsExtractionService $fakerService)
+    public function __construct(StatisticsExtractionService $extractionService)
     {
-        $this->extractionService = $fakerService;
+        $this->extractionService = $extractionService;
 
         parent::__construct();
     }

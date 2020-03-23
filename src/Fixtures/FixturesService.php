@@ -2,24 +2,24 @@
 
 /**
  * @file
- * Contains ElasticsearchFaker that creates test data in Elasticsearch.
+ * Contains FixturesService that loads fixtures into Elasticsearch.
  */
 
-namespace App\Test;
+namespace App\Fixtures;
 
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Class ElasticsearchFaker.
+ * Class FixturesService.
  */
-class DataFakerService
+class FixturesService
 {
     private $elasticsearchURL;
     private $httpClient;
 
     /**
-     * ElasticsearchFaker constructor.
+     * FixturesService constructor.
      *
      * @param HttpClientInterface $httpClient
      *   The http client
@@ -33,10 +33,10 @@ class DataFakerService
     }
 
     /**
-     * Create test data for current date.
+     * Run fixture for selected date.
      *
      * @param \DateTime|null $date
-     *   Date to create index of fake data for. Defaults to today.
+     *   Date to create index of data for. Defaults to today.
      *
      * @return bool
      *
@@ -45,7 +45,7 @@ class DataFakerService
      *
      * @throws TransportExceptionInterface
      */
-    public function createElasticsearchTestData(\DateTime $date = null): bool
+    public function runFixture(\DateTime $date = null): bool
     {
         if (null === $date) {
             $date = new \DateTime();

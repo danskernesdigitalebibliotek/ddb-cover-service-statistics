@@ -5,16 +5,16 @@ namespace App\Tests;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Command\CleanupEntriesCommand;
 use App\Command\ExtractStatisticsCommand;
-use App\Command\FakeCommand;
+use App\Command\LoadFixturesCommand;
 use App\Document\Entry;
 use App\Document\ExtractionResult;
 use App\EventSubscriber\ResponseSubscriber;
+use App\Fixtures\FixturesService;
 use App\Repository\EntryRepository;
 use App\Repository\ExtractionResultRepository;
 use App\Service\ElasticSearchService;
 use App\Service\SearchServiceInterface;
 use App\Service\StatisticsExtractionService;
-use App\Test\DataFakerService;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -170,11 +170,11 @@ class FunctionalTest extends ApiTestCase
     }
 
     /**
-     * Test DateFakerService.
+     * Test FixturesService.
      *
      * @throws \Throwable
      */
-    public function testDataFakerService()
+    public function testFixturesService()
     {
         $responses = [
             new MockResponse('', ['http_code' => 200]),
@@ -186,9 +186,9 @@ class FunctionalTest extends ApiTestCase
 
         $clientMock = new MockHttpClient($responses);
 
-        $dataFakerService = new DataFakerService($clientMock, 'http://fakesearch:9200/');
-        $result = $dataFakerService->createElasticsearchTestData(new \DateTime());
-        $this->assertTrue($result, 'createElasticsearchTestData should finish executing');
+        $fixturesService = new FixturesService($clientMock, 'http://fakesearch:9200/');
+        $result = $fixturesService->runFixture(new \DateTime());
+        $this->assertTrue($result, 'FixturesService should finish executing');
     }
 
     /**
@@ -267,15 +267,15 @@ class FunctionalTest extends ApiTestCase
         }
         $clientMock = new MockHttpClient($responses);
 
-        // Test FakeCommand
-        $command = new FakeCommand($this->createKernel(), new DataFakerService($clientMock, 'http://fakesearch:9200/'));
-        $this->assertEquals('Add fake data to elasticsearch', $command->getDescription(), 'Description should have been set.');
+        // Test LoadFixturesCommand
+        $command = new LoadFixturesCommand($this->createKernel(), new FixturesService($clientMock, 'http://fakesearch:9200/'));
+        $this->assertEquals('Load fixtures into elasticsearch', $command->getDescription(), 'Description should have been set.');
         $input = new ArrayInput([
             'date' => 'today',
         ]);
         $output = new NullOutput();
         $result = $command->run($input, $output);
-        $this->assertEquals(0, $result, 'FakeCommand should return 0');
+        $this->assertEquals(0, $result, 'LoadFixturesCommand should return 0');
     }
 
     /**
