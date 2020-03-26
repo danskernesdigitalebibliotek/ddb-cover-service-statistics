@@ -8,7 +8,7 @@ metadata:
     tier: frontend
 spec:
   selector:
-    app: {{ .Release.Namespace }}-app
+    app: {{ .Release.Name }}-app
     tier: frontend
   ports:
     - protocol: TCP
