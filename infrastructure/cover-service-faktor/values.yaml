@@ -27,6 +27,9 @@ app:
     server: "faktor-mongo-mongodb.cover-service.svc.cluster.local"
     port: "27017"
     database: "faktor"
+    storage:
+      size: "30Gi"
+      class: "managed-premium-retain"
 
 nginx:
   exporter:

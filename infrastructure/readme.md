@@ -1,6 +1,6 @@
 # Kubernetes configuration
 
-See the cover service repository about the basic cluster setup: https://github.com/danskernesdigitalebibliotek/ddb-cover-service/tree/develop/infrastructure/k8s
+See the cover service repository about the basic cluster setup: https://github.com/danskernesdigitalebibliotek/ddb-cover-service/tree/develop/infrastructure/
 
 ## Setup this part of the application.
 Change into cover service namespace.
@@ -20,6 +20,5 @@ helm install faktor-mongo bitnami/mongodb --namespace=cover-service --set mongod
 
 Deploy the application.
 ```bash
-helm install cover-service-faktor infrastructure/cover-service-faktor/ --set ingress.enableTLS=true --set ingress.domain=faktor-cover.dandigbib.org 
+helm install cover-service-faktor infrastructure/cover-service-faktor/ --namespace cover-service --set ingress.enableTLS=true --set ingress.domain=faktor-cover.dandigbib.org
 ```
-
