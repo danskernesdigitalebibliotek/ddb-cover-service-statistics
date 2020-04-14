@@ -108,7 +108,8 @@ class MongoDBTarget implements ExtractionTargetInterface
     /**
      * {@inheritdoc}
      */
-    public function validEntry($statisticsEntry): bool {
+    public function validEntry($statisticsEntry): bool
+    {
         $ret = true;
 
         if (isset($statisticsEntry->_source->context->matches)) {

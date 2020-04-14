@@ -143,7 +143,20 @@ class CsvTarget implements ExtractionTargetInterface
     /**
      * {@inheritdoc}
      */
-    public function validEntry($statisticsEntry): bool {
-        return true;
+    public function validEntry($statisticsEntry): bool
+    {
+        $ret = true;
+
+        if (isset($statisticsEntry->_source->context->matches)) {
+            $matches = $statisticsEntry->_source->context->matches;
+            foreach ($matches as $match) {
+                if (!isset($match->identifier)) {
+                    $ret = false;
+                    break;
+                }
+            }
+        }
+
+        return $ret;
     }
 }
