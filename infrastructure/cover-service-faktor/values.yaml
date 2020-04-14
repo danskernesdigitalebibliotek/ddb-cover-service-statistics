@@ -28,7 +28,8 @@ app:
     port: "27017"
     database: "faktor"
     storage:
-      size: "30Gi"
+      create: true
+      size: "100Gi"
       class: "managed-premium-retain"
 
 nginx:
