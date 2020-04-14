@@ -381,7 +381,7 @@ class StatisticsExtractionService
      *
      * @return Entry
      */
-    private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, ?string $identifierType, ?string $materialId, string $response, ?string $imageId): Entry
+    private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, string $identifierType, string $materialId, string $response, ?string $imageId): Entry
     {
         $entry = new Entry();
 
