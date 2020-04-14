@@ -139,4 +139,11 @@ class CsvTarget implements ExtractionTargetInterface
 
         return true;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validEntry($statisticsEntry): bool {
+        return true;
+    }
 }

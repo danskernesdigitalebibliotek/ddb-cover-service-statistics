@@ -201,7 +201,7 @@ class StatisticsExtractionService
      * Extract statistics for one day.
      *
      * @param \DateTime $dayToSearch
-     * @param \App\Export\ExtractionTargetInterface $target
+     * @param ExtractionTargetInterface $target
      * @param int $entriesAdded
      * @param int $entriesAddedFromDay
      * @param int $nextBatchLimit
@@ -216,6 +216,12 @@ class StatisticsExtractionService
             $statistics = $this->elasticSearchService->getLogsFromSearch($dayToSearch, 'Cover request/response');
 
             foreach ($statistics as $statisticsEntry) {
+                // Validate that the entry is valid for the target given.
+                if (!$target->validEntry($statisticsEntry)) {
+                    $this->progressAdvance();
+                    continue;
+                }
+
                 // Flush when batch size is exceeded to avoid memory buildup.
                 if ($entriesAdded > $nextBatchLimit) {
                     $nextBatchLimit = $nextBatchLimit + self::BATCH_SIZE;
@@ -375,7 +381,7 @@ class StatisticsExtractionService
      *
      * @return Entry
      */
-    private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, string $identifierType, string $materialId, string $response, ?string $imageId): Entry
+    private function createEntry(\DateTime $date, string $elasticId, string $agency, string $event, ?string $identifierType, ?string $materialId, string $response, ?string $imageId): Entry
     {
         $entry = new Entry();
 

@@ -75,4 +75,15 @@ interface ExtractionTargetInterface
      * @return bool
      */
     public function acceptsType(string $type): bool;
+
+    /**
+     * Validate the entry for required data.
+     *
+     * @param $statisticsEntry
+     *   Entry from the search engine
+     *
+     * @return bool
+     *   True if valid else false
+     */
+    public function validEntry($statisticsEntry): bool;
 }
