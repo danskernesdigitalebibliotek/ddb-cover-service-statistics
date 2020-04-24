@@ -8,6 +8,7 @@ ingress:
   enabled: true
   enableAuth: false
   enableTLS: false
+  path: "/"
 
 cron:
   runAt: "0 6 * * *"
