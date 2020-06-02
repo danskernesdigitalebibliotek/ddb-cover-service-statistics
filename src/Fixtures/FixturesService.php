@@ -23,12 +23,12 @@ class FixturesService
      *
      * @param HttpClientInterface $httpClient
      *   The http client
-     * @param $boundElasticSearchURL
+     * @param $bindElasticSearchURL
      *   Url of ElasticSearch instance
      */
-    public function __construct(HttpClientInterface $httpClient, $boundElasticSearchURL)
+    public function __construct(HttpClientInterface $httpClient, $bindElasticSearchURL)
     {
-        $this->elasticsearchURL = $boundElasticSearchURL;
+        $this->elasticsearchURL = $bindElasticSearchURL;
         $this->httpClient = $httpClient;
     }
 

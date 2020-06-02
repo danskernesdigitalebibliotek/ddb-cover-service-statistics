@@ -18,8 +18,16 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
 /**
  * @ApiResource(
- *     collectionOperations={"get"},
- *     itemOperations={"get"},
+ *     collectionOperations={
+ *         "get"={
+ *             "security"="is_granted('ROLE_ENTRY_READ')"
+ *         }
+ *     },
+ *     itemOperations={
+ *         "get"={
+ *             "security"="is_granted('ROLE_ENTRY_READ')"
+ *         }
+ *     },
  * )
  * @ApiFilter(DateFilter::class, properties={"date"})
  * @ApiFilter(BooleanFilter::class, properties={"extracted"})
