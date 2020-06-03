@@ -17,6 +17,7 @@ use App\Service\SearchServiceInterface;
 use App\Service\StatisticsExtractionService;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -41,6 +42,19 @@ class FunctionalTest extends ApiTestCase
         $this->cleanMongoDatabase();
     }
 
+    protected function login(): array
+    {
+        // Get special container that allows fetching private services
+        $container = self::$container;
+
+        $cache = $container->get(AdapterInterface::class);
+
+        // Get services.
+        $authFaker = new AuthFaker($cache);
+
+        return $authFaker->login();
+    }
+
     /**
      * Test that the Entry "get" collections endpoint works.
      *
@@ -50,11 +64,13 @@ class FunctionalTest extends ApiTestCase
     {
         $client = static::createClient();
 
+        $headers = $this->login();
+
         $response = $client->request('GET', '/api/entries', [
-            'headers' => [
+            'headers' => array_merge($headers, [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ],
+            ]),
         ]);
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -71,6 +87,8 @@ class FunctionalTest extends ApiTestCase
     {
         // Get special container that allows fetching private services
         $container = self::$container;
+
+        $headers = $this->login();
 
         // Get services.
         $entryRepository = $container->get(EntryRepository::class);
@@ -111,10 +129,10 @@ class FunctionalTest extends ApiTestCase
         // Assert that the entries can be extracted from the API.
         $client = static::createClient();
         $response = $client->request('GET', '/api/entries', [
-            'headers' => [
+            'headers' => array_merge($headers, [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ],
+            ]),
         ]);
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertResponseIsSuccessful();
