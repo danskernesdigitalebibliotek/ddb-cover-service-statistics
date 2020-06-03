@@ -1,5 +1,6 @@
-cache:
-    pools:
-        # Creates a "token.cache" service
-        token.cache:
-            adapter: cache.adapter.redis
+framework:
+    cache:
+        pools:
+            # Creates a "token.cache" service
+            token.cache:
+                adapter: cache.adapter.redis

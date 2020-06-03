@@ -32,6 +32,7 @@ class AuthFaker
      * Fake login.
      *
      * @return array
+     *
      * @throws InvalidArgumentException
      */
     public function login()
@@ -52,7 +53,7 @@ class AuthFaker
         $this->tokenCache->save($item);
 
         return [
-            'Authorization' => "Bearer $token"
+            'Authorization' => "Bearer $token",
         ];
     }
 }

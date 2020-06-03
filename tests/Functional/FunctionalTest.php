@@ -32,33 +32,10 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 class FunctionalTest extends ApiTestCase
 {
     /**
-     * {@inheritdoc}
-     */
-    protected function setUp(): void
-    {
-        self::bootKernel();
-
-        // Clean database
-        $this->cleanMongoDatabase();
-    }
-
-    protected function login(): array
-    {
-        // Get special container that allows fetching private services
-        $container = self::$container;
-
-        $cache = $container->get(AdapterInterface::class);
-
-        // Get services.
-        $authFaker = new AuthFaker($cache);
-
-        return $authFaker->login();
-    }
-
-    /**
      * Test that the Entry "get" collections endpoint works.
      *
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function testGetCollectionExists(): void
     {
@@ -360,6 +337,37 @@ class FunctionalTest extends ApiTestCase
         $this->assertEquals([
             ResponseEvent::class => 'onResponseEvent',
         ], ResponseSubscriber::getSubscribedEvents(), 'ResponseSubscriber should subscribe to onResponseEvent');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        self::bootKernel();
+
+        // Clean database
+        $this->cleanMongoDatabase();
+    }
+
+    /**
+     * Fake login.
+     *
+     * @return array
+     *
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    protected function login(): array
+    {
+        // Get special container that allows fetching private services
+        $container = self::$container;
+
+        $cache = $container->get(AdapterInterface::class);
+
+        // Get services.
+        $authFaker = new AuthFaker($cache);
+
+        return $authFaker->login();
     }
 
     /**
