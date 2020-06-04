@@ -43,7 +43,7 @@ class AuthFaker
         $user = new User();
         $user->setPassword($token);
         $user->setExpires(new \DateTime('now + 1 day'));
-        $user->setAgency('775100');
+        $user->setAgency('123456');
         $user->setAuthType('anonymous');
         $user->setClientId($clientId);
 

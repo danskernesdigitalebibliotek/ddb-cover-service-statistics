@@ -6,6 +6,7 @@
 
 namespace App\Security;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,6 +31,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     private $clientSecret;
     private $allowedAgencies;
     private $endPoint;
+    private $logger;
 
     /**
      * TokenAuthenticator constructor.
@@ -40,12 +42,13 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      * @param array $bindOpenplatformAllowedAgencies
      * @param AdapterInterface $tokenCache
      * @param HttpClientInterface $httpClient
+     * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(string $bindOpenplatformId, string $bindOpenplatformSecret, string $bindOpenplatformIntrospectionUrl, array $bindOpenplatformAllowedAgencies, AdapterInterface $tokenCache, HttpClientInterface $httpClient)
+    public function __construct(string $bindOpenplatformId, string $bindOpenplatformSecret, string $bindOpenplatformIntrospectionUrl, array $bindOpenplatformAllowedAgencies, AdapterInterface $tokenCache, HttpClientInterface $httpClient, LoggerInterface $logger)
     {
         $this->client = $httpClient;
         $this->cache = $tokenCache;
-
+        $this->logger = $logger;
         $this->clientId = $bindOpenplatformId;
         $this->clientSecret = $bindOpenplatformSecret;
         $this->endPoint = $bindOpenplatformIntrospectionUrl;
@@ -94,7 +97,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             $user = $item->get();
             $now = new \DateTime('now', new \DateTimeZone('Europe/Copenhagen'));
 
-            // Confirm that agency is allowed.
+            // Confirm that user's agency is allowed.
             if (!in_array($user->getAgency(), $this->allowedAgencies)) {
                 return null;
             }
@@ -115,27 +118,50 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             );
 
             if (200 !== $response->getStatusCode()) {
+                $this->logger->error(self::class.' http call to Open Platform returned status: '.$response->getStatusCode());
+
                 return null;
             }
 
             $content = $response->getContent();
-            $data = json_decode($content);
+            $data = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
 
-            // Token not valid, hence not active at the introspection end-point.
-            if (false === $data || false === $data->active) {
+            // Error from Open Platform
+            if (isset($data->error)) {
+                $this->logger->error(self::class.' token call to Open Platform returned error: '.$data->error);
+
+                return null;
+            }
+
+            // Unknown format/token type
+            if (isset($date->type) && 'anonymous' !== $data->type) {
+                $this->logger->error(self::class.' token call to Open Platform returned unknown type: '.$data->type);
+
+                return null;
+            }
+
+            // Token not active at the introspection end-point.
+            if (isset($data->active) && false === $data->active) {
+                return null;
+            }
+
+            // Token expired
+            $tokenExpireDataTime = new \DateTime($data->expires, new \DateTimeZone('Europe/Copenhagen'));
+            $now = new \DateTime();
+            if ($now > $tokenExpireDataTime) {
                 return null;
             }
         } catch (HttpExceptionInterface $e) {
+            $this->logger->error(self::class.' http exception: '.$e->getMessage());
+
             return null;
         } catch (ExceptionInterface $e) {
+            $this->logger->error(self::class.' exception: '.$e->getMessage());
+
             return null;
-        }
+        } catch (\JsonException $e) {
+            $this->logger->error(self::class.' json decode exception: '.$e->getMessage());
 
-        $tokenExpireDataTime = new \DateTime($data->expires, new \DateTimeZone('Europe/Copenhagen'));
-        $now = new \DateTime('now', new \DateTimeZone('Europe/Copenhagen'));
-
-        // Check that the token is not expired.
-        if ($tokenExpireDataTime < $now) {
             return null;
         }
 

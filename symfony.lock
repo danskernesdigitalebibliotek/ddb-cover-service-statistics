@@ -162,9 +162,6 @@
     "ocramius/proxy-manager": {
         "version": "2.2.3"
     },
-    "pdepend/pdepend": {
-        "version": "2.6.1"
-    },
     "phan/phan": {
         "version": "2.4.6"
     },
@@ -182,9 +179,6 @@
     },
     "phpdocumentor/type-resolver": {
         "version": "1.0.1"
-    },
-    "phpmd/phpmd": {
-        "version": "2.8.1"
     },
     "pimple/pimple": {
         "version": "v3.2.3"
