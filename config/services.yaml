@@ -18,6 +18,7 @@ services:
             $bindOpenplatformId: '%env(OPENPLATFORM_ID)%'
             $bindOpenplatformSecret: '%env(OPENPLATFORM_SECRET)%'
             $bindOpenplatformIntrospectionUrl: '%env(OPENPLATFORM_INTROSPECTION_URL)%'
+            $bindOpenplatformAllowedAgencies: '%env(json:OPENPLATFORM_ALLOWED_AGENCIES)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

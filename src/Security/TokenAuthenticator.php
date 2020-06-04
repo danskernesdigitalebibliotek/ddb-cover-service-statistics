@@ -26,9 +26,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 {
     private $client;
     private $cache;
-
     private $clientId;
     private $clientSecret;
+    private $allowedAgencies;
     private $endPoint;
 
     /**
@@ -37,10 +37,11 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      * @param string $bindOpenplatformId
      * @param string $bindOpenplatformSecret
      * @param string $bindOpenplatformIntrospectionUrl
+     * @param array $bindOpenplatformAllowedAgencies
      * @param AdapterInterface $tokenCache
      * @param HttpClientInterface $httpClient
      */
-    public function __construct(string $bindOpenplatformId, string $bindOpenplatformSecret, string $bindOpenplatformIntrospectionUrl, AdapterInterface $tokenCache, HttpClientInterface $httpClient)
+    public function __construct(string $bindOpenplatformId, string $bindOpenplatformSecret, string $bindOpenplatformIntrospectionUrl, array $bindOpenplatformAllowedAgencies, AdapterInterface $tokenCache, HttpClientInterface $httpClient)
     {
         $this->client = $httpClient;
         $this->cache = $tokenCache;
@@ -48,6 +49,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         $this->clientId = $bindOpenplatformId;
         $this->clientSecret = $bindOpenplatformSecret;
         $this->endPoint = $bindOpenplatformIntrospectionUrl;
+        $this->allowedAgencies = $bindOpenplatformAllowedAgencies;
     }
 
     /**
@@ -92,6 +94,11 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             $user = $item->get();
             $now = new \DateTime('now', new \DateTimeZone('Europe/Copenhagen'));
 
+            // Confirm that agency is allowed.
+            if (!in_array($user->getAgency(), $this->allowedAgencies)) {
+                return null;
+            }
+
             // If not expired, return user.
             if ($user->getExpires() >= $now) {
                 return $user;
@@ -132,11 +139,18 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             return null;
         }
 
+        $agency = $data->agency;
+
+        // Confirm that agency is allowed.
+        if (!in_array($agency, $this->allowedAgencies)) {
+            return null;
+        }
+
         // Create user object.
         $user = new User();
         $user->setPassword($token);
         $user->setExpires($tokenExpireDataTime);
-        $user->setAgency($data->agency);
+        $user->setAgency($agency);
         $user->setAuthType($data->type);
         $user->setClientId($data->clientId);
 
