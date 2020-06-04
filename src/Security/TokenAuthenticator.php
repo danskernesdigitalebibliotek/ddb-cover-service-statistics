@@ -108,7 +108,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             $data = json_decode($content);
 
             // Token not valid, hence not active at the introspection end-point.
-            if (false === $data->active) {
+            if (false === $data || false === $data->active) {
                 return null;
             }
         } catch (HttpExceptionInterface $e) {
