@@ -88,7 +88,14 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         // Try getting item from cache.
         $item = $this->cache->getItem($token);
         if ($item->isHit()) {
-            return $item->get();
+            /* @var User $user */
+            $user = $item->get();
+            $now = new \DateTime('now', new \DateTimeZone('Europe/Copenhagen'));
+
+            // If not expired, return user.
+            if ($user->getExpires() >= $now) {
+                return $user;
+            }
         }
 
         try {
@@ -117,8 +124,15 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             return null;
         }
 
-        // Create user object.
         $tokenExpireDataTime = new \DateTime($data->expires, new \DateTimeZone('Europe/Copenhagen'));
+        $now = new \DateTime('now', new \DateTimeZone('Europe/Copenhagen'));
+
+        // Check that the token is not expired.
+        if ($tokenExpireDataTime < $now) {
+            return null;
+        }
+
+        // Create user object.
         $user = new User();
         $user->setPassword($token);
         $user->setExpires($tokenExpireDataTime);
