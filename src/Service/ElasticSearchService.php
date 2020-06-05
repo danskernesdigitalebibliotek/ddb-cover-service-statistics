@@ -26,10 +26,10 @@ class ElasticSearchService implements SearchServiceInterface
 
     private $elasticSearchURL;
 
-    /** @var HttpClientInterface $httpClient */
+    /** @var HttpClientInterface */
     private $httpClient;
 
-    /** @var FilesystemAdapter $cache */
+    /** @var FilesystemAdapter */
     private $cache;
 
     /**

@@ -55,7 +55,7 @@ class ResponseSubscriber implements EventSubscriberInterface
             Entry::class === $request->attributes->get('_api_resource_class')) {
             $response = $event->getResponse();
 
-            if ($response->getStatusCode() === 200) {
+            if (200 === $response->getStatusCode()) {
                 try {
                     $results = json_decode($event->getResponse()->getContent(), false, 512, JSON_THROW_ON_ERROR);
 
@@ -84,7 +84,8 @@ class ResponseSubscriber implements EventSubscriberInterface
                             }
                         );
                     }
-                } catch (\JsonException $e) {}
+                } catch (\JsonException $e) {
+                }
             }
         }
     }

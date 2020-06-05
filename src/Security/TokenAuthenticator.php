@@ -73,7 +73,6 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 
     /**
      * {@inheritdoc}
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
