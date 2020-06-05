@@ -73,6 +73,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 
     /**
      * {@inheritdoc}
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
@@ -95,17 +96,13 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         if ($item->isHit()) {
             /* @var User $user */
             $user = $item->get();
-            $now = new \DateTime('now', new \DateTimeZone('Europe/Copenhagen'));
 
             // Confirm that user's agency is allowed.
             if (!in_array($user->getAgency(), $this->allowedAgencies)) {
                 return null;
             }
 
-            // If not expired, return user.
-            if ($user->getExpires() >= $now) {
-                return $user;
-            }
+            return $user;
         }
 
         try {

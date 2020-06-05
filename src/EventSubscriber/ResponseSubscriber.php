@@ -53,27 +53,39 @@ class ResponseSubscriber implements EventSubscriberInterface
         // If requesting Event collection, mark each element as already retrieved.
         if ('api_entries_get_collection' === $request->attributes->get('_route') &&
             Entry::class === $request->attributes->get('_api_resource_class')) {
-            $results = json_decode($event->getResponse()->getContent());
+            $response = $event->getResponse();
 
-            $ids = array_reduce($results, function ($carry, $element) {
-                $carry[] = $element->id;
+            if ($response->getStatusCode() === 200) {
+                try {
+                    $results = json_decode($event->getResponse()->getContent(), false, 512, JSON_THROW_ON_ERROR);
 
-                return $carry;
-            }, []);
+                    if (is_array($results)) {
+                        $ids = array_reduce(
+                            $results,
+                            function ($carry, $element) {
+                                $carry[] = $element->id;
 
-            $this->dispatcher->addListener(
-                KernelEvents::TERMINATE,
-                function (TerminateEvent $event) use ($ids, $extractionDatetime) {
-                    foreach ($ids as $id) {
-                        /* @var Entry $entry */
-                        $entry = $this->documentManager->getRepository(Entry::class)->find($id);
-                        $entry->setExtracted(true);
-                        $entry->setExtractionDate($extractionDatetime);
+                                return $carry;
+                            },
+                            []
+                        );
+
+                        $this->dispatcher->addListener(
+                            KernelEvents::TERMINATE,
+                            function (TerminateEvent $event) use ($ids, $extractionDatetime) {
+                                foreach ($ids as $id) {
+                                    /* @var Entry $entry */
+                                    $entry = $this->documentManager->getRepository(Entry::class)->find($id);
+                                    $entry->setExtracted(true);
+                                    $entry->setExtractionDate($extractionDatetime);
+                                }
+
+                                $this->documentManager->flush();
+                            }
+                        );
                     }
-
-                    $this->documentManager->flush();
-                }
-            );
+                } catch (\JsonException $e) {}
+            }
         }
     }
 
