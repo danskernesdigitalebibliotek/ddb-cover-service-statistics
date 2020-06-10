@@ -13,7 +13,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
  */
 trait ProgressBarTrait
 {
-    /** @var ProgressBar $progressBar */
+    /** @var ProgressBar */
     private $progressBar;
 
     /**

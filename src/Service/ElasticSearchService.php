@@ -26,10 +26,10 @@ class ElasticSearchService implements SearchServiceInterface
 
     private $elasticSearchURL;
 
-    /** @var HttpClientInterface $httpClient */
+    /** @var HttpClientInterface */
     private $httpClient;
 
-    /** @var FilesystemAdapter $cache */
+    /** @var FilesystemAdapter */
     private $cache;
 
     /**
@@ -37,12 +37,12 @@ class ElasticSearchService implements SearchServiceInterface
      *
      * @param HttpClientInterface $httpClient
      *   The http client
-     * @param string $boundElasticSearchURL
+     * @param string $bindElasticSearchURL
      *   URL of ElasticSearch instance
      */
-    public function __construct(HttpClientInterface $httpClient, string $boundElasticSearchURL)
+    public function __construct(HttpClientInterface $httpClient, string $bindElasticSearchURL)
     {
-        $this->elasticSearchURL = $boundElasticSearchURL;
+        $this->elasticSearchURL = $bindElasticSearchURL;
         $this->httpClient = $httpClient;
 
         $this->cache = new FilesystemAdapter();
