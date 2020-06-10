@@ -42,7 +42,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      * @param array $bindOpenplatformAllowedAgencies
      * @param AdapterInterface $tokenCache
      * @param HttpClientInterface $httpClient
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      */
     public function __construct(string $bindOpenplatformId, string $bindOpenplatformSecret, string $bindOpenplatformIntrospectionUrl, array $bindOpenplatformAllowedAgencies, AdapterInterface $tokenCache, HttpClientInterface $httpClient, LoggerInterface $logger)
     {
@@ -151,12 +151,12 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             $this->logger->error(self::class.' http exception: '.$e->getMessage());
 
             return null;
-        } catch (ExceptionInterface $e) {
-            $this->logger->error(self::class.' exception: '.$e->getMessage());
-
-            return null;
         } catch (\JsonException $e) {
             $this->logger->error(self::class.' json decode exception: '.$e->getMessage());
+
+            return null;
+        } catch (\Exception $e) {
+            $this->logger->error(self::class.' exception: '.$e->getMessage());
 
             return null;
         }
