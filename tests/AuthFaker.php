@@ -7,7 +7,7 @@
 
 namespace App\Tests;
 
-use App\Security\User;
+use DanskernesDigitaleBibliotek\AgencyAuthBundle\Security\User;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 

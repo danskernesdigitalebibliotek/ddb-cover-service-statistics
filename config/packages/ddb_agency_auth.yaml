@@ -1,0 +1,19 @@
+ddb_agency_auth:
+  # Your client id supplied by DBC
+  openplatform_id: '%env(OPENPLATFORM_ID)%'
+
+  # Your client secret supplied by DBC
+  openplatform_secret: '%env(OPENPLATFORM_SECRET)%'
+
+  # The introspection URL to query against
+  openplatform_introspection_url: 'https://login.bib.dk/oauth/introspection'
+
+  # An allow list of CLIENT_IDs that are allowed access. An empty list allows all.
+  openplatform_allowed_clients: []
+
+  # [Optional] An id for the cache service to use for caching token/user pairs
+  auth_token_cache: token.cache
+
+  # [Optional] An id for the logger to log errors to.
+  auth_logger: logger
+  

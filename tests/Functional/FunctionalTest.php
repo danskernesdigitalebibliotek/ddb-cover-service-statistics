@@ -17,7 +17,6 @@ use App\Service\SearchServiceInterface;
 use App\Service\StatisticsExtractionService;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -31,6 +30,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
  */
 class FunctionalTest extends ApiTestCase
 {
+
     /**
      * Test that the Entry "get" collections endpoint works.
      *
@@ -362,7 +362,7 @@ class FunctionalTest extends ApiTestCase
         // Get special container that allows fetching private services
         $container = self::$container;
 
-        $cache = $container->get(AdapterInterface::class);
+        $cache = $container->get('token.cache');
 
         // Get services.
         $authFaker = new AuthFaker($cache);
