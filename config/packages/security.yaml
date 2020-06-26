@@ -19,7 +19,7 @@ security:
     access_control:
         # Allows accessing the Swagger UI
         - { path: '^/api/docs', roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: '^/api', roles: ROLE_OPENPLATFORM_AGENCY }
+        - { path: '^/api', roles: ROLE_API_USER }
 
     role_hierarchy:
         ROLE_OPENPLATFORM_AGENCY: [ROLE_API_USER, ROLE_ENTRY_READ]
