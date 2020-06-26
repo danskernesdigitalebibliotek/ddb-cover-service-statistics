@@ -80,6 +80,10 @@ jobs:
                 ports:
                     - 9200:9200
                 options: -e="discovery.type=single-node" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
+            mongodb:
+                image: mongo:3.4.23
+                ports:
+                    - 27017:27017
         steps:
             # —— Check Elasticsearch 🔎 ——————————————————————————————————————————————
             - name: Check the Elasticsearch connection from runner host
@@ -110,7 +114,10 @@ jobs:
               run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
 
             - name: Behaviour tests
-              run: ELASTIC_URL=http://localhost:9200 phpdbg -d memory_limit=-1 -qrr ./vendor/bin/behat
+              run: |
+                  MONGODB_URL=mongodb://db:password@localhost:27017
+                  ELASTIC_URL=http://localhost:9200
+                  phpdbg -d memory_limit=-1 -qrr ./vendor/bin/behat
 
     runner-phpcs:
         runs-on: ubuntu-latest
