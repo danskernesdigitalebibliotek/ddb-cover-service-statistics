@@ -35,6 +35,83 @@ jobs:
                   set -a && source .env && set +a
                   APP_ENV=prod composer install --no-dev -o
 
+    unit_tests:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ['7.4', '7.3']
+        name: Unit tests (${{ matrix.php}})
+        steps:
+            - uses: actions/checkout@master
+
+            - name: Setup PHP, with composer and extensions
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php}}
+                  extension: apcu, ctype, iconv, json, redis, xmlreader
+                  coverage: none
+
+            - name: Get composer cache directory
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            - uses: actions/cache@v1
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: ${{ matrix.php }}-composer-
+
+            - name: Install Dependencies
+              run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+
+            - name: Unit tests
+              run: phpdbg -qrr ./vendor/bin/phpunit --coverage-clover=coverage/unit.xml
+
+    behaviour_tests:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ['7.4', '7.3']
+        name: Behaviour tests (${{ matrix.php}})
+        services:
+            elasticsearch:
+                image: elasticsearch:6.8.4
+                ports:
+                    - 9200:9200
+                options: -e="discovery.type=single-node" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
+        steps:
+            # —— Check Elasticsearch 🔎 ——————————————————————————————————————————————
+            - name: Check the Elasticsearch connection from runner host
+              run: |
+                  curl -fsSL "http://localhost:9200"
+                  curl -fsSL "http://localhost:9200/_cluster/health?pretty"
+
+            - name: Checkout
+              uses: actions/checkout@master
+
+            - name: Setup PHP, with composer and extensions
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  extension: apcu, ctype, iconv, json, redis, xmlreader
+                  coverage: none
+
+            - name: Get composer cache directory
+              id: composer-cache
+              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+            - uses: actions/cache@v1
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: ${{ matrix.php }}-composer-
+
+            - name: Install Dependencies
+              run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+
+            - name: Behaviour tests
+              run: ELASTIC_URL=http://localhost:9200 phpdbg -d memory_limit=-1 -qrr ./vendor/bin/behat
+
     runner-phpcs:
         runs-on: ubuntu-latest
         strategy:
