@@ -38,7 +38,7 @@
         "version": "1.4.0"
     },
     "danskernesdigitalebibliotek/agency-auth-bundle": {
-        "version": "0.1.0"
+        "version": "0.2.1"
     },
     "doctrine/annotations": {
         "version": "1.0",
@@ -533,7 +533,7 @@
             "config/packages/security.yaml"
         ]
     },
-    "symfony/security-http": {
+    "symfony/security-core": {
         "version": "v4.4.10"
     },
     "symfony/serializer": {
