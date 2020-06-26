@@ -8,8 +8,8 @@ ddb_agency_auth:
   # The introspection URL to query against
   openplatform_introspection_url: 'https://login.bib.dk/oauth/introspection'
 
-  # An allow list of CLIENT_IDs that are allowed access. An empty list allows all.
-  openplatform_allowed_clients: []
+  # A comma separated allow list of CLIENT_IDs. An empty list allows all.
+  openplatform_allowed_clients: '%env(OPENPLATFORM_ALLOWED_CLIENTS)%'
 
   # [Optional] An id for the cache service to use for caching token/user pairs
   auth_token_cache: token.cache
