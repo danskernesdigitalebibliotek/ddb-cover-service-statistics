@@ -64,6 +64,9 @@ jobs:
             - name: Install Dependencies
               run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
 
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v2
+
             - name: Unit tests
               run: phpdbg -qrr ./vendor/bin/phpunit --coverage-clover=coverage/unit.xml
 
@@ -114,10 +117,7 @@ jobs:
               run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
 
             - name: Behaviour tests
-              run: |
-                  MONGODB_URL=mongodb://localhost:27017
-                  ELASTIC_URL=http://localhost:9200
-                  phpdbg -d memory_limit=-1 -qrr ./vendor/bin/behat
+              run: MONGODB_URL=mongodb://localhost:27017 ELASTIC_URL=http://localhost:9200 phpdbg -d memory_limit=-1 -qrr ./vendor/bin/behat
 
     runner-phpcs:
         runs-on: ubuntu-latest
