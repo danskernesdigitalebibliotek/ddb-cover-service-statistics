@@ -51,6 +51,7 @@ jobs:
                   php-version: ${{ matrix.php}}
                   extension: apcu, ctype, iconv, json, redis, xmlreader
                   coverage: none
+                  ini-values: memory_limit=256M
 
             - name: Get composer cache directory
               id: composer-cache
@@ -63,9 +64,6 @@ jobs:
 
             - name: Install Dependencies
               run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
-
-            - name: Setup tmate session
-              uses: mxschmitt/action-tmate@v2
 
             - name: Unit tests
               run: phpdbg -qrr ./vendor/bin/phpunit --coverage-clover=coverage/unit.xml
