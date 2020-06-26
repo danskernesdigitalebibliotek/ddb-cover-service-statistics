@@ -30,7 +30,6 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
  */
 class FunctionalTest extends ApiTestCase
 {
-
     /**
      * Test that the Entry "get" collections endpoint works.
      *
