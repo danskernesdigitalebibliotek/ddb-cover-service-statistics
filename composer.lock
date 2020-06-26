@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d6f772b5fe20cfc2f730211510b57a42",
+    "content-hash": "920c339f4cd2bd12e2344f4338a542ae",
     "packages": [
         {
             "name": "api-platform/api-pack",
@@ -264,16 +264,16 @@
         },
         {
             "name": "danskernesdigitalebibliotek/agency-auth-bundle",
-            "version": "0.2.1",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/danskernesdigitalebibliotek/agency-auth-bundle.git",
-                "reference": "44ad12b84d67dd6962cb12edb15c0a760e472658"
+                "reference": "79930f36d0b22647df147a446f8ba841ff7670e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/danskernesdigitalebibliotek/agency-auth-bundle/zipball/44ad12b84d67dd6962cb12edb15c0a760e472658",
-                "reference": "44ad12b84d67dd6962cb12edb15c0a760e472658",
+                "url": "https://api.github.com/repos/danskernesdigitalebibliotek/agency-auth-bundle/zipball/79930f36d0b22647df147a446f8ba841ff7670e7",
+                "reference": "79930f36d0b22647df147a446f8ba841ff7670e7",
                 "shasum": ""
             },
             "require": {
@@ -281,7 +281,6 @@
                 "ext-json": "*",
                 "php": "^7.3",
                 "symfony/config": "^4.4",
-                "symfony/contracts": "^1.0",
                 "symfony/dependency-injection": "^4.4",
                 "symfony/http-client": "^4.4",
                 "symfony/http-foundation": "^4.4",
@@ -289,6 +288,7 @@
                 "symfony/security": "^4.4"
             },
             "require-dev": {
+                "drenso/phan-extensions": "^3.1",
                 "escapestudios/symfony2-coding-standard": "^3.10",
                 "friendsofphp/php-cs-fixer": "^2.13",
                 "phan/phan": "^3.0",
@@ -306,7 +306,7 @@
                 "AGPL-3.0-only"
             ],
             "description": "Agency authentication against the Open Platform",
-            "time": "2020-06-26T13:20:13+00:00"
+            "time": "2020-06-26T20:52:50+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -2541,77 +2541,6 @@
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
             "time": "2020-05-30T20:06:45+00:00"
-        },
-        {
-            "name": "symfony/contracts",
-            "version": "v1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/contracts.git",
-                "reference": "d3636025e8253c6144358ec0a62773cae588395b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/contracts/zipball/d3636025e8253c6144358ec0a62773cae588395b",
-                "reference": "d3636025e8253c6144358ec0a62773cae588395b",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.1.3"
-            },
-            "require-dev": {
-                "psr/cache": "^1.0",
-                "psr/container": "^1.0",
-                "symfony/polyfill-intl-idn": "^1.10"
-            },
-            "suggest": {
-                "psr/cache": "When using the Cache contracts",
-                "psr/container": "When using the Service contracts",
-                "symfony/cache-contracts-implementation": "",
-                "symfony/event-dispatcher-implementation": "",
-                "symfony/http-client-contracts-implementation": "",
-                "symfony/service-contracts-implementation": "",
-                "symfony/translation-contracts-implementation": ""
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.1-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Contracts\\": ""
-                },
-                "exclude-from-classmap": [
-                    "**/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nicolas Grekas",
-                    "email": "p@tchwork.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "A set of abstractions extracted out of the Symfony components",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "abstractions",
-                "contracts",
-                "decoupling",
-                "interfaces",
-                "interoperability",
-                "standards"
-            ],
-            "time": "2019-04-27T14:29:50+00:00"
         },
         {
             "name": "symfony/debug",
