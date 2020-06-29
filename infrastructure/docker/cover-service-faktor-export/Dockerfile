@@ -21,8 +21,7 @@ RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make openssl-
     && ./configure --with-mongodb-client-side-encryption=no \
     && make all \
     && make install \
-    && docker-php-ext-enable mongodb \
-    && apk del .build-deps
+    && docker-php-ext-enable mongodb
 
 WORKDIR ${APP_PATH}
 
@@ -33,6 +32,9 @@ RUN APP_ENV=prod composer install --no-dev -o --no-scripts --classmap-authoritat
     && APP_ENV=prod REDIS_CACHE_SYSTEM_BACKEND=cache.adapter.system composer docker-build \
     && cp -f /tmp/cache.yaml config/packages/cache.yaml \
     && composer clear-cache
+
+# Git is needed to clone stuff, so with with removal of build deps until after composer install.
+RUN apk del .build-deps
 
 # Install the application.
 RUN chown -R www-data:www-data ${APP_PATH}/var \
