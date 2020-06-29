@@ -36,7 +36,7 @@ app:
     storage:
       create: true
       size: "100Gi"
-      class: "managed-premium-retain"
+      class: "azurefile-premium-retain"
 
 nginx:
   exporter:
