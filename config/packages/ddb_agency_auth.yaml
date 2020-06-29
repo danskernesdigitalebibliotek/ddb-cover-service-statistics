@@ -16,4 +16,3 @@ ddb_agency_auth:
 
   # [Optional] An id for the logger to log errors to.
   auth_logger: logger
-  

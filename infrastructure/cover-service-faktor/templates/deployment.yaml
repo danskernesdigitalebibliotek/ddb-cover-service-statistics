@@ -65,6 +65,21 @@ spec:
               secretKeyRef:
                 name: {{ .Release.Name }}-secret
                 key: APP_MONGODB_PASSWORD
+          - name: APP_OPENPLATFORM_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: APP_OPENPLATFORM_ID
+          - name: APP_OPENPLATFORM_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: APP_OPENPLATFORM_SECRET
+          - name: APP_OPENPLATFORM_ALLOWED_CLIENTS
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: APP_OPENPLATFORM_ALLOWED_CLIENTS
         envFrom:
           - configMapRef:
               name: {{ .Release.Name }}-configmap
