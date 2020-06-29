@@ -54,7 +54,7 @@ class FixturesService
         $dateString = ($date)->format('d-m-Y');
 
         $indexName = 'stats_'.$dateString;
-        $path = $indexName;
+        $path = '/'.$indexName;
 
         // Create index.
         $this->httpClient->request('PUT', $this->elasticsearchURL.$path);
