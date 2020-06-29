@@ -1,0 +1,46 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-cronjob
+spec:
+  schedule: {{ .Values.cron.runAt }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.cron.successfulLimit }}
+  failedJobsHistoryLimit: {{ .Values.cron.failedLimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        spec:
+          containers:
+            - name: cronjob
+              image: danskernesdigitalebibliotek/cover-service-faktor-export:{{ .Values.app.image.version }}
+              imagePullPolicy: {{ .Values.app.image.imagePullPolicy }}
+              args:
+                - "bin/console"
+                - "app:extract:latest"
+                - "--no-debug"
+              env:
+                - name: APP_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Release.Name }}-secret
+                      key: APP_SECRET
+                - name: APP_MONGODB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Release.Name }}-secret
+                      key: APP_MONGODB_USER
+                - name: APP_MONGODB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Release.Name }}-secret
+                      key: APP_MONGODB_PASSWORD
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-configmap
+          restartPolicy: OnFailure

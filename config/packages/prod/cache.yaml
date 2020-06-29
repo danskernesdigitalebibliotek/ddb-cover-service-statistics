@@ -1,0 +1,10 @@
+framework:
+    cache:
+        # Redis
+        system: cache.adapter.redis
+        app: cache.adapter.redis
+
+        pools:
+            # Creates a "token.cache" service
+            token.cache:
+                adapter: cache.adapter.redis
