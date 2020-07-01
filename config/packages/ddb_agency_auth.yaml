@@ -6,7 +6,7 @@ ddb_agency_auth:
   openplatform_secret: '%env(OPENPLATFORM_SECRET)%'
 
   # The introspection URL to query against
-  openplatform_introspection_url: 'https://login.bib.dk/oauth/introspection'
+  openplatform_introspection_url: '%env(OPENPLATFORM_INTROSPECTION_URL)'
 
   # A comma separated allow list of CLIENT_IDs. An empty list allows all.
   openplatform_allowed_clients: '%env(OPENPLATFORM_ALLOWED_CLIENTS)%'
