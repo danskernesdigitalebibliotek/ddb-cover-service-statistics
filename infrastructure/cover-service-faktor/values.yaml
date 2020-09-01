@@ -19,9 +19,9 @@ app:
   image:
     version: latest
     pullPolicy: IfNotPresent
-  elastic_url: "http://elasticsearch-es-http:9200/"
+  elastic_url: "http://es-elasticsearch-coordinating-only.cover-service.svc.cluster.local:9200"
   redis:
-    server: "redis"
+    server: "redis-master.cover-service.svc.cluster.local"
     port: "6379"
     cache_db: "12"
   php:
