@@ -10,7 +10,7 @@ RUN tar -zxf /tmp/app.tar --strip-components=1 -C ${APP_PATH} \
     && rm /tmp/app.tar
 
 # Add composer in from the official composer image (also alpine).
-COPY --from=composer:1.9.1 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:1 /usr/bin/composer /usr/bin/composer
 
 # Install mongodb php extension (hack https://github.com/mongodb/mongo-php-driver/issues/1097)
 RUN apk --update add --no-cache --virtual .build-deps autoconf g++ make openssl-dev git \
