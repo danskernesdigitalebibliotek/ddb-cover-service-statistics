@@ -1,7 +1,7 @@
 ARG VERSION="latest"
 FROM danskernesdigitalebibliotek/cover-service-faktor-export:${VERSION} as APPLICATION
 
-FROM nginx:1.17-alpine
+FROM nginx:1.20.1-alpine
 LABEL maintainer="ITK Dev <itkdev@mkb.aarhus.dk>"
 
 ENV APP_PATH=/var/www/html
